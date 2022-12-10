@@ -77,15 +77,91 @@ where `var1` and `var2` are the string source and destination variables respecti
 
 ## Examples
 
-Get the example data from GitHub:
+Load the Stata dataset
 
 ```
-use "https://github.com/asjadnaqvi/stata-alluvial/blob/main/data/alluvial2.dta?raw=true", clear
+sysuse nlsw88.dta, clear
 ```
 
 Let's test the `alluvial` command:
 
 
+```
+alluvial race married collgrad smsa union
+```
+
+<img src="/figures/alluvial1.png" height="600">
+
+### Smooth
+
+```
+alluvial race married collgrad smsa union, smooth(1)
+```
+
+<img src="/figures/alluvial1_1.png" height="600">
+
+```
+alluvial race married collgrad smsa union, smooth(8)
+```
+
+<img src="/figures/alluvial1_2.png" height="600">
+
+
+### colors
+
+```
+alluvial race married collgrad smsa union, colorby(layer)
+```
+
+<img src="/figures/alluvial2.png" height="600">
+
+```
+alluvial race married collgrad smsa union, palette(CET C7)
+```
+
+<img src="/figures/alluvial6.png" height="600">
+
+### shares
+
+```
+alluvial race married collgrad smsa union, shares
+```
+
+<img src="/figures/alluvial3.png" height="600">
+
+### showmiss
+
+```
+alluvial race married collgrad smsa union, showmiss shares
+```
+
+<img src="/figures/alluvial4.png" height="600">
+
+### gap
+
+
+```
+alluvial race married collgrad smsa union, gap(0)
+```
+
+<img src="/figures/alluvial5_1.png" height="600">
+
+```
+alluvial race married collgrad smsa union, gap(10)
+```
+
+<img src="/figures/alluvial5_2.png" height="600">
+
+### all together
+
+```
+local vars race married collgrad smsa union
+
+alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(>100) valsize(2) showtot ///
+	xsize(2) ysize(1) lc(black) lw(0.1) 
+```
+
+<img src="/figures/alluvial7.png" height="600">
 
 ## Feedback
 
