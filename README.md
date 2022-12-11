@@ -116,10 +116,17 @@ alluvial race married collgrad smsa union, colorby(layer)
 <img src="/figures/alluvial2.png" height="600">
 
 ```
-alluvial race married collgrad smsa union, palette(CET C7)
+alluvial race married collgrad smsa union, palette(carto)
 ```
 
 <img src="/figures/alluvial6.png" height="600">
+
+```
+alluvial race married collgrad smsa union, palette(CET I2)
+```
+
+<img src="/figures/alluvial6_1.png" height="600">
+
 
 ### shares
 
