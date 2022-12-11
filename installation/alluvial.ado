@@ -3,11 +3,10 @@
 
 
 
-
 cap program drop alluvial
 
 
-program alluvial, // sortpreserve
+program alluvial, sortpreserve
 
 version 15
  
@@ -128,7 +127,7 @@ preserve
 
 	
 
-**** SANKEY ROUTINE BELOW
+	**** SANKEY ROUTINE BELOW
 
 	ren layer x1
 	summ x1, meanonly
@@ -183,9 +182,7 @@ preserve
 	drop y
 
 	order layer grp id lab x y1 y2 val
-	
-	
-	
+
 	// mark the highest value and the layer
 
 	levelsof x, local(lvls)
@@ -244,12 +241,12 @@ preserve
 	foreach y of local lleft {  // left
 		foreach x of local lright {      // right
 
-			di "Layer `left' to `right': `x' - `y'"
+			// di "Layer `left' to `right': `x' - `y'"
 		
 			if `x' == `y' & (`x'!=9999 & `y'!=9999) {  // check if the groups are equal
 
 				// in layer range	
-				summ y1 if flo==`x' & layer==`left' & x==`left' //, meanonly   // here x and y don't matter
+				summ y1 if flo==`x' & layer==`left' & x==`left', meanonly 
 				if r(N) > 0 {
 					local y1max `r(max)'
 					local y1min `r(min)'
@@ -259,7 +256,7 @@ preserve
 					local y1min 0				
 				}	
 					
-				summ y2 if flo==`x' & layer==`left' & x==`left' //, meanonly   // here x and y don't matter
+				summ y2 if flo==`x' & layer==`left' & x==`left', meanonly 
 				if r(N) > 0 {
 					local y2max `r(max)'
 					local y2min `r(min)'
@@ -273,7 +270,7 @@ preserve
 				local l1min = min(`y1min',`y2min')
 				
 				// out layer range		
-				summ y1 if flo==`x' & layer==`right' & x==`left' //, meanonly 
+				summ y1 if flo==`x' & layer==`right' & x==`left', meanonly 
 				if r(N) > 0 {	
 					local y1max `r(max)'
 					local y1min `r(min)'
@@ -283,7 +280,7 @@ preserve
 					local y1min 0
 				}
 
-				summ y2 if flo==`x' & layer==`right' & x==`left' //, meanonly 
+				summ y2 if flo==`x' & layer==`right' & x==`left', meanonly 
 				if r(N) > 0 {	
 					local y2max `r(max)'
 					local y2min `r(min)'
@@ -595,10 +592,10 @@ preserve
 
 	foreach x of local lvls {
 		
-		if `switch' == 1 { // by layer
+		if `switch' == 1 { 	// by layer
 			qui sum layer if id==`x'
 		}
-		else {  // by category
+		else {  			// by category
 			qui sum x if id==`x'
 			qui sum order if id==`x' & x == r(min)
 		}
@@ -617,7 +614,6 @@ preserve
 	**** PLOT EVERYTHING ***
 	
 	if "`catsize'"		== "" local catsize 2.3	
-	
 	
 	if "`labangle'" 	== "" local labangle 90
 	if "`labsize'" 		== "" local labsize 2	
@@ -684,8 +680,6 @@ restore
 }	
 
  
-
-
 end
 
 
