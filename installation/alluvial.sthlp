@@ -101,7 +101,7 @@ Even if you have these installed, it is highly recommended to update the depende
 
 {title:Examples}
 
-See {browse "https://github.com/asjadnaqvi/alluvial":GitHub} for examples.
+See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 
 
@@ -117,7 +117,7 @@ See {browse "https://github.com/asjadnaqvi/alluvial":GitHub} for examples.
 Version      : {bf:alluvial} v1.0
 This release : 10 Dec 2022
 First release: 10 Dec 2022
-Repository   : {browse "https://github.com/asjadnaqvi/alluvial":GitHub}
+Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial
 License      : {browse "https://opensource.org/licenses/MIT":MIT}
 
