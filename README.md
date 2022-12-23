@@ -8,10 +8,10 @@
 
 The package can be installed via SSC or GitHub. The GitHub version, *might* be more recent due to bug fixes, feature updates etc, and *may* contain syntax improvements and changes in *default* values. See version numbers below. Eventually the GitHub version is published on SSC.
 
-SSC ():
+SSC (**v1.0**):
 
 ```
-Coming soon!
+ssc install alluvial, replace
 ```
 
 GitHub (**v1.0**):
@@ -68,10 +68,10 @@ See the help file `help alluvial` for details.
 The most basic use is as follows:
 
 ```
-alluvial value, from(var1) to(var2) by(level variable)
+alluvial varlist
 ```
 
-where `var1` and `var2` are the string source and destination variables respectively against which the `value` variable is plotted. The `by()` variable defines the levels.
+where `varlist` are categorival variables given at the unit of observation. If any variable has more than 10 categories, or it is continuous, the command will throw an error. This is to avoid over-crowding the figure. For suggestions on how to automate this, please open an issue!
 
 
 
