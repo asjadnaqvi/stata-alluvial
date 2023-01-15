@@ -172,7 +172,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 	xsize(2) ysize(1) lc(black) lw(0.1) 
 ```
 
-<img src="/figures/alluvial7.png" height="600">
+<img src="/figures/alluvial7.png" height="400">
 
 ### Offset and label rotation
 
@@ -183,7 +183,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 	laba(0) labpos(3) noval offset(6)
 ```
 
-<img src="/figures/alluvial8.png" height="600">
+<img src="/figures/alluvial8.png" height="400">
 
 
 ## Feedback
