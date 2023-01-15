@@ -174,7 +174,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 <img src="/figures/alluvial7.png" height="400">
 
-### Offset and label rotation
+### Offset and label rotation (v1.1)
 
 ```
 local vars race married collgrad smsa union
