@@ -1,7 +1,8 @@
-*! Alluvial v1.0 10 Dec 2022. Beta release.
+*! Alluvial v1.1 15 Jan 2023.
 *! Asjad Naqvi 
 
-
+* v1.1 15 Jan 2023: fix label pass through. Weights added. offset added. valcond is just numeric. missing now has a color.
+* v1.0 10 Dec 2022: Beta release.        
 
 cap program drop alluvial
 
@@ -10,12 +11,13 @@ program alluvial, sortpreserve
 
 version 15
  
-	syntax varlist [if] [in],  ///
-		[ palette(string) colorby(string) smooth(numlist >=1 <=8) gap(real 2) RECENter(string) shares showmiss alpha(real 75) ]  ///
+	syntax varlist [if] [in] [aw fw pw iw/],  ///
+		[ palette(string) colorby(string) smooth(numlist >=1 <=8) gap(real 2) RECENter(string) SHAREs showmiss alpha(real 75) ]  ///
 		[ CATGap(string) CATSize(string)    ]  ///
 		[ LABAngle(string) LABSize(string) LABPOSition(string) LABGap(string) SHOWTOTal  ] ///
-		[ VALSize(string)  VALCONDition(string) VALFormat(string) VALGap(string) NOVALues  ]  ///
+		[ VALSize(string)   VALFormat(string) VALGap(string) NOVALues  ]  ///
 		[ LWidth(string) LColor(string)  ]  ///
+		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
 		[ title(passthru) subtitle(passthru) note(passthru) scheme(passthru) name(passthru) xsize(passthru) ysize(passthru)		] 
 		
 
@@ -33,11 +35,9 @@ qui {
 preserve 	
 
 	*keep if `touse'  // this is dropping missing values
-	keep `varlist' 
+	keep `varlist' `exp'
 
-	
 	foreach x of local varlist {
-		
 		
 		cap confirm numeric var `x'  // convert from numeric to string.
 		if _rc!=0 {
@@ -48,7 +48,7 @@ preserve
 		else { 	
 			qui levelsof `x'
 
-			if r(r) > 20 {
+			if `r(r)' > 20 {
 				di as error "`x' has more than 20 categories. The variable might be continuous."
 				di as error "Please simplify or drop the variable."
 				exit
@@ -56,8 +56,18 @@ preserve
 		}
 	}
 	
-	
 
+	// store labels for later passthru
+	foreach x of local varlist {
+		if "`: var label `x''" != "" {
+			local mylab`x' : var label `x'
+		}
+		else {
+			local mylab`x' `x'
+		}
+	}
+
+	
 	gen temp = 1
 	local items : word count `varlist'
 	local items2 = `items' - 1
@@ -107,25 +117,38 @@ preserve
 	gen value = 1
 	
 	if "`showmiss'" != "" {
-		replace f = 9999 if f==.
-		replace t = 9999 if t==.
+		replace labf = "_missing" if f==.
+		replace labt = "_missing" if t==.
+		
+		replace f = 99999 if f==.
+		replace t = 99999 if t==.
+		
 	}
 	else {
 		drop if f==.
 		drop if t==.
 	}	
 	
-
-	collapse (sum) value, by(f t layer labt labf catf catt)
-	sort layer f
+	if "`weight'" != "" {
+		local myweight  [`weight' = `exp']
+	}
 	
+	
+	collapse (sum) value `myweight', by(f t layer labt labf catf catt)
+	sort layer f t
+
 
 	if "`shares'" != "" {
-		replace value =  (value / `obs') 
-		format value %5.2f
+		if "`weight'" == "" {
+			replace value =  (value / `obs') 
+			format value %5.2f
+		}
+		else {
+			bysort layer: egen mysum = sum(value)
+			replace value =  (value / mysum) 
+		}
 	}
 
-	
 
 	**** SANKEY ROUTINE BELOW
 
@@ -165,7 +188,7 @@ preserve
 	ren f flo1
 	ren t flo2
 	
-		
+			
 	reshape long x flo val grp y cat lab, i(id layer) j(tt)
 	drop tt
 
@@ -199,7 +222,6 @@ preserve
 	}
 	
 	
-
 	*** add gaps
 	
 	local propgap = `hival' * `gap' / 100
@@ -217,7 +239,6 @@ preserve
 	
 	
 	*** transform the groups to be at the mid points	
-
 
 	sort x id y1 y2
 	gen y1t = .
@@ -241,9 +262,8 @@ preserve
 	foreach y of local lleft {  // left
 		foreach x of local lright {      // right
 
-			// di "Layer `left' to `right': `x' - `y'"
 		
-			if `x' == `y' & (`x'!=9999 & `y'!=9999) {  // check if the groups are equal
+			if `x' == `y' & (`x'!=99999 & `y'!=99999) {  // check if the groups are equal
 
 				// in layer range	
 				summ y1 if flo==`x' & layer==`left' & x==`left', meanonly 
@@ -504,26 +524,30 @@ preserve
 			 
 	egen wedge = group(x flo)		 
 	egen tagw = tag(wedge)		
-
+	
+	replace lab = "{it:missing}" if flo== 99999
 	
 	*** tag the category labels
 	
 	summ ymin, meanonly
-	local catmin = r(min)
-	
+		local catmin = r(min)
 	summ ymax, meanonly
-	local catmax = r(max)
-	
+		local catmax = r(max)
 	
 	egen tagc = tag(cat)
 	if "`catgap'"		== "" local catgap 2
 	
 	gen grpy = `catmin' - ((`catmax' - `catmin') * `catgap' / 100) if tagc==1
 	
+	gen grpnm = ""
 	
+	foreach x of local varlist {
+		replace grpnm = "`mylab`x''" if cat=="`x'" & tagc==1
+
+	}
+	
+
 	sort x flo 
-	
-	replace lab = "{it:*missing}" if flo== 9999
 	
 
 	********************
@@ -622,12 +646,9 @@ preserve
 	
 	
 	if "`valsize'"  == "" local valsize 1.5
-	if "`valcondition'"  == "" {
-		local labcon "if val >= 0"
-	}
-	else {
-		local labcon "if val `valcondition'"
-	}
+
+	local labcon "if val >= `valcondition'"
+
 	
 	if "`valformat'" == "" {
 		if "`shares'"=="" {
@@ -662,20 +683,30 @@ preserve
 		
 	}	
 	
+		
+	// offset
+	
+	summ x, meanonly
+	local xrmin = r(min)
+	local xrmax = r(max) + ((r(max) - r(min)) * `offset' / 100) 
+	
+	
+	// FINAL PLOT //
+	
 	
 	twoway ///
 		`shapes' ///
 			`boxes' ///
 			(scatter midy x if  tag==1, msymbol(none) mlabel(`lab') mlabsize(`labsize') mlabgap(`labgap') mlabpos(`labposition') mlabangle(`labangle') mlabcolor(black)) ///
 			`values' ///
-			(scatter grpy x if tagc==1, msymbol(none) mlabel(cat) mlabgap(`catgap') mlabsize(`catsize') mlabpos(0) mlabcolor(black)) ///
+			(scatter grpy x if tagc==1, msymbol(none) mlabel(grpnm) mlabgap(`catgap') mlabsize(`catsize') mlabpos(0) mlabcolor(black)) ///
 			, ///
 				legend(off) ///
 					xlabel(, nogrid) ylabel(0 `yrange', nogrid)     ///
-					xscale(off) yscale(off)	 ///
+					xscale(off range(`xrmin' `xrmax')) yscale(off)	 ///
 					`title' `subtitle' `note' `scheme' `name'	///
 					`xsize' `ysize'
-	
+*/
 restore
 }	
 

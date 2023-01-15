@@ -1,7 +1,7 @@
 {smcl}
-{* 10Dec2022}{...}
+{* 15Jan2023}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.0 (beta) (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.1 (GitHub)}}
 
 {hline}
 
@@ -10,12 +10,12 @@
 {marker syntax}{title:Syntax}
 {p 8 15 2}
 
-{cmd:alluvial} {it:varlist} {ifin}, 
+{cmd:alluvial} {it:varlist} {ifin} {weight}, 
                 {cmd:[} 
                   {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) 
                   {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labg:ap}({it:str}) {cmdab:showtot:al}
-                  {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:str}) {cmdab:valf:ormat}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues}
-                  {cmdab:lw:idth}({it:str}) {cmdab:lc:olor}({it:str}) {cmd:alpha}({it:num})
+                  {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmdab:valf:ormat}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues}
+                  {cmdab:lw:idth}({it:str}) {cmdab:lc:olor}({it:str}) {cmd:alpha}({it:num}) {cmd:offset}({it:num})
                   {cmd:title}({it:str}) {cmd:subtitle}({it:str}) {cmd:note}({it:str}) {cmd:scheme}({it:str}) {cmd:name}({it:str}) {cmd:xsize}({it:num}) {cmd:ysize}({it:num}) 
                 {cmd:]}
 
@@ -29,16 +29,17 @@ Please report errors/bugs/enhancement requests on {browse "https://github.com/as
 {synopthdr}
 {synoptline}
 
-{p2coldent : {opt alluvial}  varlist}The command requires a set of categorical variables. The command tabulates the combinations based on the number of rows for each category.{p_end}
+{p2coldent : {opt alluvial} varlist}The command requires a set of categorical variables. The command tabulates the combinations based on the number of rows for each category.
+If a variable has more than 20 categories, the program will throw and error and exit. Weights are allowed but use them cautiously.
+They still needed to be fully tested.{p_end}
 
 {p2coldent : {opt palette(name)}}Color name is any named scheme defined in the {stata help colorpalette:colorpalette} package. Default is {stata colorpalette tableau:{it:tableau}}.{p_end}
 
-{p2coldent : {opt colorby(option)}}Users can color the diagram by {ul:layer} or {ul:level}. 
-The {it:layer} option, determined by the {cmd:by()} variable, will give each layer a unique color.
-The {it:level} option will give each category a unique color, even if they exist across multiple layers.
+{p2coldent : {opt colorby(option)}}Users can color the diagram by {ul:layer} or {ul:level}. The {it:layer} option, determined by the {cmd:by()} variable, will give 
+each layer a unique color. The {it:level} option will give each category a unique color, even if they exist across multiple layers. 
 The default value is {cmd:colorby(level)}.{p_end}
 
-{p2coldent : {opt shares}}Convert the values into shares.{p_end}
+{p2coldent : {opt shares}}Convert the values into shares. If weights are used, these will be weighted shares.{p_end}
 
 {p2coldent : {opt showmiss}}Add a missing values category on the graph. The shares of existing categories plus the missing category for each layer add up to one.{p_end}
 
@@ -63,6 +64,9 @@ Default value is {cmd:alpha(75)} for 75% transparency.{p_end}
 
 {p2coldent : {opt labpos:ition(str)}}The position of the category labels. Default is {cmd:labpos(0)} for centered.{p_end}
 
+{p2coldent : {opt offset(num)}}The value, in percentage of x-axis width, to extend the x-axis on the right-hand side. Default is {cmd:offset(0)}.
+This option is highly useful if labels are rotated horizontally, and for example, positioned at 3 o'clock.{p_end}
+
 {p2coldent : {opt labg:ap(str)}}The gap of the category labels from the mid point of the wedges. Default is {cmd:labg(0)} for no gap.
 If the label angle is change to horitzontal or the label position is changed from 0, then {cmd:labg()} can be used to fine-tune the placement.{p_end}
 
@@ -70,9 +74,8 @@ If the label angle is change to horitzontal or the label position is changed fro
 
 {p2coldent : {opt vals:ize(str)}}The size of the displayed values. Default is {cmd:vals(1.5)}.{p_end}
 
-{p2coldent : {opt valcond:ition(str)}}The condition to display the values.
-This option can be used to reduce the number of labels displayed especially if there are a lot of very small categories than can make the figure look messy.
-The way to use this option is to define an if condition, e.g. {cmd:valcond(>=100)}, will only show values above 100.{p_end}
+{p2coldent : {opt valcond:ition(num)}}The condition for showing value labels. For example, if we only want to display categories with a greater than a value of 100, 
+we can specify {opt valcond(100)}. If the {opt share} is used, then please specify the share threshold (out of 100). Default is {opt valcond(0)}.{p_end}
 
 {p2coldent : {opt valf:ormat(str)}}The format of the displayed values. Default is {cmd:valf(%12.0f)}.{p_end}
 
@@ -104,18 +107,12 @@ Even if you have these installed, it is highly recommended to update the depende
 See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 
-
 {hline}
-
-{title:Version history}
-
-- {bf:1.0} : First version.
-
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.0
-This release : 10 Dec 2022
+Version      : {bf:alluvial} v1.1
+This release : 15 Jan 2023
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial
@@ -128,7 +125,7 @@ Twitter      : {browse "https://twitter.com/AsjadNaqvi":@AsjadNaqvi}
 
 {title:Acknowledgements}
 
-
+Marc Kaulisch suggested several improvements. Ana Karen Díaz Méndez provided examples for implementing weights.
 
 {title:Feedback}
 
@@ -137,6 +134,8 @@ Please submit bugs, errors, feature requests on {browse "https://github.com/asja
 {title:References}
 
 {p 4 8 2}Jann, B. (2018). {browse "https://www.stata-journal.com/article.html?article=gr0075":Color palettes for Stata graphics}. The Stata Journal 18(4): 765-785.
+
+{p 4 8 2}Jann, B. (2022). {browse "https://ideas.repec.org/p/bss/wpaper/43.html":Color palettes for Stata graphics: an update}. University of Bern Social Sciences Working Papers No. 43. 
 
 {title:Other visualization packages}
 
