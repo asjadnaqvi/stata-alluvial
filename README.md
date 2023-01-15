@@ -1,8 +1,13 @@
 
 ![StataMin](https://img.shields.io/badge/stata-2015-blue) ![issues](https://img.shields.io/github/issues/asjadnaqvi/stata-alluvial) ![license](https://img.shields.io/github/license/asjadnaqvi/stata-alluvial) ![Stars](https://img.shields.io/github/stars/asjadnaqvi/stata-alluvial) ![version](https://img.shields.io/github/v/release/asjadnaqvi/stata-alluvial) ![release](https://img.shields.io/github/release-date/asjadnaqvi/stata-alluvial)
 
-# alluvial v1.1
+---
 
+[Installation](#Installation) | [Syntax](#Syntax) | [Examples](#Examples) | [Feedback](#Feedback) | [Change log](#Change-log)
+
+---
+
+# alluvial v1.1
 
 ## Installation
 
@@ -186,11 +191,11 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to report errors, feature enhancements, and/or other requests.
 
 
-## Versions
+## Change log
 
 **v1.1 (15 Jan 2023)**
-- Variable labels are no correctly passing to the final graph (requested by Marc Kaulisch and Ana Karen Díaz Méndez.
-- Weights option added. Still in beta so more testing is required.
+- Variable labels are no correctly passing to the final graph (requested by Marc Kaulisch and Ana Karen Díaz Méndez).
+- Weights option added. Still in beta so more testing is required (requested by Ana Karen Díaz Méndez).
 - `offset` option added to extend the x-axis (requested by Marc Kaulisch).
 - `valcond` is now just a numeric. It is assumed that the condition implies `>= <valcond>`.
 - The missing category, enabled using the `showmiss` option, now has its own color (requested by Marc Kaulisch).
