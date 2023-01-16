@@ -194,7 +194,7 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 ## Change log
 
 **v1.1 (15 Jan 2023)**
-- Variable labels are no correctly passing to the final graph (requested by Marc Kaulisch and Ana Karen Díaz Méndez).
+- Variable labels are now correctly passing to the final graph (requested by Marc Kaulisch and Ana Karen Díaz Méndez).
 - Weights option added. Still in beta so more testing is required (requested by Ana Karen Díaz Méndez).
 - `offset` option added to extend the x-axis (requested by Marc Kaulisch).
 - `valcond` is now just a numeric. It is assumed that the condition implies `>= <valcond>`.
