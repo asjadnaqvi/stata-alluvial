@@ -1,4 +1,4 @@
-v 1.1
+v 1.2
 d 'ALLUVIAL': A Stata package for Alluvial plots
 d Asjad Naqvi, 
 d asjadnaqvi@gmail.com

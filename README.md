@@ -7,7 +7,7 @@
 
 ---
 
-# alluvial v1.1
+# alluvial v1.2
 
 ## Installation
 
@@ -19,7 +19,7 @@ SSC (**v1.1**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.1**):
+GitHub (**v1.2**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -62,7 +62,7 @@ alluvial varlist [if] [in] [weight],
                   palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) 
                   labangle(str) labsize(str) labposition(str) labgap(str) showtotal
                   valsize(str) valcondition(num) valformat(str) valgap(str) novalues
-                  lwidth(str) lcolor(str) alpha(num) offset(num)
+                  lwidth(str) lcolor(str) alpha(num) offset(num) boxwidth(str)
                   title(str) subtitle(str) note(str) scheme(str) name(str) xsize(num) ysize(num) 
                 ]
 ```
@@ -185,6 +185,17 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 <img src="/figures/alluvial8.png" height="400">
 
+### Box width (v1.2)
+
+```
+local vars race married collgrad smsa union
+alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsize(2) showtot ///
+	xsize(2) ysize(1) lc(black) lw(0.1) ///
+	laba(0) labpos(3) noval offset(6) boxwid(6)
+```
+
+<img src="/figures/alluvial9.png" height="400">
+
 
 ## Feedback
 
@@ -192,6 +203,11 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+**v1.2 (04 Apr 2023)**
+- `if/in` added back in the command.
+- `boxwidth()` added to the command.
+- Minor bug fixes.
 
 **v1.1 (15 Jan 2023)**
 - Variable labels are now correctly passing to the final graph (requested by Marc Kaulisch and Ana Karen Díaz Méndez).

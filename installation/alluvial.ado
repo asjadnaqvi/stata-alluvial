@@ -1,6 +1,8 @@
-*! Alluvial v1.1 15 Jan 2023.
+*! Alluvial v1.2 (04 Apr 2023).
 *! Asjad Naqvi 
 
+
+* v1.2 04 Apr 2023: Minor fixes. If/in added back in.
 * v1.1 15 Jan 2023: fix label pass through. Weights added. offset added. valcond is just numeric. missing now has a color.
 * v1.0 10 Dec 2022: Beta release.        
 
@@ -18,6 +20,7 @@ version 15
 		[ VALSize(string)   VALFormat(string) VALGap(string) NOVALues  ]  ///
 		[ LWidth(string) LColor(string)  ]  ///
 		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
+		[ BOXWidth(string) ] /// // v1.2 
 		[ title(passthru) subtitle(passthru) note(passthru) scheme(passthru) name(passthru) xsize(passthru) ysize(passthru)		] 
 		
 
@@ -34,7 +37,7 @@ version 15
 qui {
 preserve 	
 
-	*keep if `touse'  // this is dropping missing values
+	keep if `touse'  
 	keep `varlist' `exp'
 
 	foreach x of local varlist {
@@ -549,6 +552,8 @@ preserve
 
 	sort x flo 
 	
+	if "`boxwidth'"    == "" local boxwidth 3.2
+	
 
 	********************
 	*** final plot   ***
@@ -597,7 +602,7 @@ preserve
 
 		
 		colorpalette `palette' , nograph `poptions'
-		local boxes `boxes' (rspike ymin ymax x if wedge==`x' & tagw==1, lcolor("`r(p`clr')'%100") lw(3.4)) ||
+		local boxes `boxes' (rspike ymin ymax x if wedge==`x' & tagw==1, lcolor("`r(p`clr')'%100") lw(`boxwidth')) ||
 		
 	}
 
