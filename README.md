@@ -1,4 +1,6 @@
 
+![alluvial-1](https://github.com/asjadnaqvi/stata-alluvial/assets/38498046/7690794e-dc07-482d-9c19-46dc3f658a77)
+
 ![StataMin](https://img.shields.io/badge/stata-2015-blue) ![issues](https://img.shields.io/github/issues/asjadnaqvi/stata-alluvial) ![license](https://img.shields.io/github/license/asjadnaqvi/stata-alluvial) ![Stars](https://img.shields.io/github/stars/asjadnaqvi/stata-alluvial) ![version](https://img.shields.io/github/v/release/asjadnaqvi/stata-alluvial) ![release](https://img.shields.io/github/release-date/asjadnaqvi/stata-alluvial)
 
 ---
@@ -8,6 +10,7 @@
 ---
 
 # alluvial v1.2
+(04 Apr 2023)
 
 ## Installation
 
