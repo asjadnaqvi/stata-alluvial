@@ -1,10 +1,10 @@
-*! Alluvial v1.2 (04 Apr 2023).
+*! Alluvial v1.21 (19 Oct 2023).
 *! Asjad Naqvi 
 
-
-* v1.2 04 Apr 2023: Minor fixes. If/in added back in.
-* v1.1 15 Jan 2023: fix label pass through. Weights added. offset added. valcond is just numeric. missing now has a color.
-* v1.0 10 Dec 2022: Beta release.        
+* v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
+* v1.2  (04 Apr 2023): Minor fixes. If/in added back in.
+* v1.1  (15 Jan 2023): fix label pass through. Weights added. offset added. valcond is just numeric. missing now has a color.
+* v1.0  (10 Dec 2022): Beta release.        
 
 cap program drop alluvial
 
@@ -37,7 +37,7 @@ version 15
 qui {
 preserve 	
 
-	keep if `touse'  
+	*keep if `touse'   // this is dropping missing values. DO NOT ENABLE
 	keep `varlist' `exp'
 
 	foreach x of local varlist {

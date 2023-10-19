@@ -1,7 +1,7 @@
 {smcl}
-{* 04Apr2023}{...}
+{* 19Oct2023}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.2 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.21 (GitHub)}}
 
 {hline}
 
@@ -113,8 +113,8 @@ See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.2
-This release : 04 Apr 2023
+Version      : {bf:alluvial} v1.21
+This release : 19 Oct 2023
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial
@@ -125,10 +125,6 @@ E-mail       : asjadnaqvi@gmail.com
 Twitter      : {browse "https://twitter.com/AsjadNaqvi":@AsjadNaqvi}
 
 
-{title:Acknowledgements}
-
-Marc Kaulisch suggested several improvements. Ana Karen Díaz Méndez provided examples for implementing weights.
-Min Zhang and ngrams reported the if error.
 
 {title:Feedback}
 

@@ -9,8 +9,8 @@
 
 ---
 
-# alluvial v1.2
-(04 Apr 2023)
+# alluvial v1.21
+(19 Oct 2023)
 
 ## Installation
 
@@ -22,7 +22,7 @@ SSC (**v1.2**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.2**):
+GitHub (**v1.21**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -57,7 +57,7 @@ graph set window fontface "Arial Narrow"
 
 ## Syntax
 
-The syntax for **v1.0** is as follows:
+The syntax for the latest version is as follows:
 
 ```
 alluvial varlist [if] [in] [weight], 
@@ -206,6 +206,9 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+**v1.21 (19 Oct 2023)**
+- `showmiss` was not generating the missing values category (reported by Matthias Schonlau). This has been fixed.
 
 **v1.2 (04 Apr 2023)**
 - `if/in` added back in the command.
