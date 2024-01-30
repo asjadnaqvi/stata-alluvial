@@ -16,7 +16,7 @@
 
 The package can be installed via SSC or GitHub. The GitHub version, *might* be more recent due to bug fixes, feature updates etc, and *may* contain syntax improvements and changes in *default* values. See version numbers below. Eventually the GitHub version is published on SSC.
 
-SSC (**v1.2**):
+SSC (**v1.21**):
 
 ```
 ssc install alluvial, replace
@@ -97,7 +97,7 @@ Let's test the `alluvial` command:
 alluvial race married collgrad smsa union
 ```
 
-<img src="/figures/alluvial1.png" height="600">
+<img src="/figures/alluvial1.png" width="100%">
 
 ### Smooth
 
@@ -105,13 +105,13 @@ alluvial race married collgrad smsa union
 alluvial race married collgrad smsa union, smooth(1)
 ```
 
-<img src="/figures/alluvial1_1.png" height="600">
+<img src="/figures/alluvial1_1.png" width="100%">
 
 ```
 alluvial race married collgrad smsa union, smooth(8)
 ```
 
-<img src="/figures/alluvial1_2.png" height="600">
+<img src="/figures/alluvial1_2.png" width="100%">
 
 
 ### colors
@@ -120,19 +120,19 @@ alluvial race married collgrad smsa union, smooth(8)
 alluvial race married collgrad smsa union, colorby(layer)
 ```
 
-<img src="/figures/alluvial2.png" height="600">
+<img src="/figures/alluvial2.png" width="100%">
 
 ```
 alluvial race married collgrad smsa union, palette(carto)
 ```
 
-<img src="/figures/alluvial6.png" height="600">
+<img src="/figures/alluvial6.png" width="100%">
 
 ```
 alluvial race married collgrad smsa union, palette(CET I2)
 ```
 
-<img src="/figures/alluvial6_1.png" height="600">
+<img src="/figures/alluvial6_1.png" width="100%">
 
 
 ### shares
@@ -141,7 +141,7 @@ alluvial race married collgrad smsa union, palette(CET I2)
 alluvial race married collgrad smsa union, shares
 ```
 
-<img src="/figures/alluvial3.png" height="600">
+<img src="/figures/alluvial3.png" width="100%">
 
 ### showmiss
 
@@ -149,7 +149,7 @@ alluvial race married collgrad smsa union, shares
 alluvial race married collgrad smsa union, showmiss shares
 ```
 
-<img src="/figures/alluvial4.png" height="600">
+<img src="/figures/alluvial4.png" width="100%">
 
 ### gap
 
@@ -158,13 +158,13 @@ alluvial race married collgrad smsa union, showmiss shares
 alluvial race married collgrad smsa union, gap(0)
 ```
 
-<img src="/figures/alluvial5_1.png" height="600">
+<img src="/figures/alluvial5_1.png" width="100%">
 
 ```
 alluvial race married collgrad smsa union, gap(10)
 ```
 
-<img src="/figures/alluvial5_2.png" height="600">
+<img src="/figures/alluvial5_2.png" width="100%">
 
 ### all together
 
@@ -175,7 +175,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 	xsize(2) ysize(1) lc(black) lw(0.1) 
 ```
 
-<img src="/figures/alluvial7.png" height="400">
+<img src="/figures/alluvial7.png" width="100%">
 
 ### Offset and label rotation (v1.1)
 
@@ -186,7 +186,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 	laba(0) labpos(3) noval offset(6)
 ```
 
-<img src="/figures/alluvial8.png" height="400">
+<img src="/figures/alluvial8.png" width="100%">
 
 ### Box width (v1.2)
 
@@ -197,7 +197,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 	laba(0) labpos(3) noval offset(6) boxwid(6)
 ```
 
-<img src="/figures/alluvial9.png" height="400">
+<img src="/figures/alluvial9.png" width="100%">
 
 
 ## Feedback
