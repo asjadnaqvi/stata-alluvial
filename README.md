@@ -9,7 +9,7 @@
 
 ---
 
-# alluvial v1.21
+# alluvial v1.3
 (19 Oct 2023)
 
 ## Installation
@@ -22,7 +22,7 @@ SSC (**v1.21**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.21**):
+GitHub (**v1.3**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -59,14 +59,16 @@ graph set window fontface "Arial Narrow"
 
 The syntax for the latest version is as follows:
 
-```
+```stata
 alluvial varlist [if] [in] [weight], 
                 [ 
                   palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) 
-                  labangle(str) labsize(str) labposition(str) labgap(str) showtotal
-                  valsize(str) valcondition(num) valformat(str) valgap(str) novalues
+                  labangle(str) labsize(str) labposition(str) labcolor(str) labgap(str) 
+                  catangle(str) catsize(str) catposition(str) catcolor(str) catgap(str) 
+                  valsize(str) valcondition(num) valformat(str) valgap(str) novalues  showtotal
                   lwidth(str) lcolor(str) alpha(num) offset(num) boxwidth(str)
                   title(str) subtitle(str) note(str) scheme(str) name(str) xsize(num) ysize(num) 
+                  graphregion(str) plotregion(str) text(str) 
                 ]
 ```
 
@@ -206,6 +208,12 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+**v1.3 (10 Feb 2024)**
+- Options added to control category variables including size, color, gap, angle, position.
+- Option `labcolor()` added.
+- Options `graphregion()` and `plotregion()` added.
+- Minor code cleanups.
 
 **v1.21 (19 Oct 2023)**
 - `showmiss` was not generating the missing values category (reported by Matthias Schonlau). This has been fixed.

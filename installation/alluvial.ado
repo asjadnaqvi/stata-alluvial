@@ -1,6 +1,7 @@
-*! Alluvial v1.21 (19 Oct 2023).
-*! Asjad Naqvi 
+*! alluvial v1.3 (10 Feb 2024)
+*! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
 * v1.2  (04 Apr 2023): Minor fixes. If/in added back in.
 * v1.1  (15 Jan 2023): fix label pass through. Weights added. offset added. valcond is just numeric. missing now has a color.
@@ -15,19 +16,19 @@ version 15
  
 	syntax varlist [if] [in] [aw fw pw iw/],  ///
 		[ palette(string) colorby(string) smooth(numlist >=1 <=8) gap(real 2) RECENter(string) SHAREs showmiss alpha(real 75) ]  ///
-		[ CATGap(string) CATSize(string)    ]  ///
 		[ LABAngle(string) LABSize(string) LABPOSition(string) LABGap(string) SHOWTOTal  ] ///
 		[ VALSize(string)   VALFormat(string) VALGap(string) NOVALues  ]  ///
 		[ LWidth(string) LColor(string)  ]  ///
 		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
 		[ BOXWidth(string) ] /// // v1.2 
-		[ title(passthru) subtitle(passthru) note(passthru) scheme(passthru) name(passthru) xsize(passthru) ysize(passthru)		] 
+		[ title(passthru) subtitle(passthru) note(passthru) scheme(passthru) name(passthru) xsize(passthru) ysize(passthru) saving(passthru) ]  ///
+		[ CATGap(string) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string) graphregion(passthru) plotregion(passthru) text(passthru)  ]    // v1.3 options
 		
 
 	// check dependencies
 	cap findfile colorpalette.ado
 	if _rc != 0 {
-		display as error "The palettes package is missing. Install the {stata ssc install palettes, replace:palettes} and {stata ssc install colrspace, replace:colrspace} packages."
+		display as error "The {bf:palettes} package is missing. Install the {stata ssc install palettes, replace:palettes} and {stata ssc install colrspace, replace:colrspace} packages."
 		exit
 	}
 	
@@ -538,7 +539,7 @@ preserve
 		local catmax = r(max)
 	
 	egen tagc = tag(cat)
-	if "`catgap'"		== "" local catgap 2
+	if "`catgap'"		== "" local catgap 3
 	
 	gen grpy = `catmin' - ((`catmax' - `catmin') * `catgap' / 100) if tagc==1
 	
@@ -642,12 +643,18 @@ preserve
 			
 	**** PLOT EVERYTHING ***
 	
-	if "`catsize'"		== "" local catsize 2.3	
+
 	
 	if "`labangle'" 	== "" local labangle 90
 	if "`labsize'" 		== "" local labsize 2	
 	if "`labposition'"  == "" local labposition 0	
 	if "`labgap'" 		== "" local labgap 0
+	if "`labcolor'" 	== "" local labcolor black
+	
+	if "`catsize'"		== "" local catsize 2.3	
+	if "`catposition'"	== "" local catposition 0
+	if "`catcolor'"		== "" local catcolor black
+	if "`catangle'"		== "" local catangle 0	
 	
 	
 	if "`valsize'"  == "" local valsize 1.5
@@ -682,9 +689,9 @@ preserve
 	}
 	
 	if "`novalues'" == "" {
-		local values `values' (scatter midp   x   `labcon', msymbol(none) mlabel(val) mlabsize(`valsize') mlabpos(3)             mlabgap(`valgap')                       mlabcolor(black)) ///
+		local values `values' (scatter midp   x   `labcon', msymbol(none) mlabel(val) mlabsize(`valsize') mlabpos(3)             mlabgap(`valgap')                       mlabcolor(`labcolor')) ///
 		
-		local values `values' (scatter midpin xin `labcon', msymbol(none) mlabel(val) mlabsize(`valsize') mlabpos(9)             mlabgap(`valgap')                       mlabcolor(black)) ///
+		local values `values' (scatter midpin xin `labcon', msymbol(none) mlabel(val) mlabsize(`valsize') mlabpos(9)             mlabgap(`valgap')                       mlabcolor(`labcolor')) ///
 		
 	}	
 	
@@ -695,22 +702,23 @@ preserve
 	local xrmin = r(min)
 	local xrmax = r(max) + ((r(max) - r(min)) * `offset' / 100) 
 	
-	
+
+		
 	// FINAL PLOT //
 	
 	
 	twoway ///
 		`shapes' ///
 			`boxes' ///
-			(scatter midy x if  tag==1, msymbol(none) mlabel(`lab') mlabsize(`labsize') mlabgap(`labgap') mlabpos(`labposition') mlabangle(`labangle') mlabcolor(black)) ///
+			(scatter midy x if  tag==1, msymbol(none) mlabel(`lab') mlabgap(`labgap') mlabsize(`labsize') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle')) ///
 			`values' ///
-			(scatter grpy x if tagc==1, msymbol(none) mlabel(grpnm) mlabgap(`catgap') mlabsize(`catsize') mlabpos(0) mlabcolor(black)) ///
+			(scatter grpy x if tagc==1, msymbol(none) mlabel(grpnm) 		          mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
 			, ///
 				legend(off) ///
 					xlabel(, nogrid) ylabel(0 `yrange', nogrid)     ///
 					xscale(off range(`xrmin' `xrmax')) yscale(off)	 ///
-					`title' `subtitle' `note' `scheme' `name'	///
-					`xsize' `ysize'
+					`title' `subtitle' `note' `scheme' `name' `text'	///
+					`xsize' `ysize' `saving' `graphregion' `plotregion'
 */
 restore
 }	

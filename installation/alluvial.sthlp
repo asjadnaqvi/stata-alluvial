@@ -1,7 +1,7 @@
 {smcl}
-{* 19Oct2023}{...}
+{* 10Feb2024}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.21 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.3 (GitHub)}}
 
 {hline}
 
@@ -13,10 +13,12 @@
 {cmd:alluvial} {it:varlist} {ifin} {weight}, 
                 {cmd:[} 
                   {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) 
-                  {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labg:ap}({it:str}) {cmdab:showtot:al}
-                  {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmdab:valf:ormat}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues}
+                  {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labc:olor}({it:str}) {cmdab:labg:ap}({it:str}) 
+                  {cmdab:cata:ngle}({it:str}) {cmdab:cats:ize}({it:str}) {cmdab:catpos:ition}({it:str}) {cmdab:catc:olor}({it:str}) {cmdab:catg:ap}({it:str}) 
+                  {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmdab:valf:ormat}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues}  {cmdab:showtot:al}
                   {cmdab:lw:idth}({it:str}) {cmdab:lc:olor}({it:str}) {cmd:alpha}({it:num}) {cmd:offset}({it:num}) {cmdab:boxw:idth}({it:str})
                   {cmd:title}({it:str}) {cmd:subtitle}({it:str}) {cmd:note}({it:str}) {cmd:scheme}({it:str}) {cmd:name}({it:str}) {cmd:xsize}({it:num}) {cmd:ysize}({it:num}) 
+                  {cmd:graphregion}({it:str}) {cmd:plotregion}({it:str}) {cmd:text}({it:str}) 
                 {cmd:]}
 
 
@@ -60,11 +62,28 @@ Default value is {cmd:alpha(75)} for 75% transparency.{p_end}
 
 {p2coldent : {opt lc:olor(str)}}The outline color of the area fills. Default is {cmd:lc(white)}.{p_end}
 
-{p2coldent : {opt labs:ize(str)}}The size of the category labels. Default is {cmd:labs(2)}.{p_end}
 
-{p2coldent : {opt laba:ngle(str)}}The angle of the category labels. Default is {cmd:laba(90)} for vertical labels.{p_end}
+{p2coldent : {opt laba:ngle(str)}}The angle of the box labels. Default is {cmd:laba(90)} for vertical labels.{p_end}
 
-{p2coldent : {opt labpos:ition(str)}}The position of the category labels. Default is {cmd:labpos(0)} for centered.{p_end}
+{p2coldent : {opt labs:ize(str)}}The size of the box labels. Default is {cmd:labs(2)}.{p_end}
+
+{p2coldent : {opt labpos:ition(str)}}The position of the box labels. Default is {cmd:labpos(0)} for centered.{p_end}
+
+{p2coldent : {opt labc:olor(str)}}The color of the box labels. Default is {cmd:labc(black)}.{p_end}
+
+{p2coldent : {opt labg:ap(str)}}The gap of the box labels. Default is {cmd:labg(0)}.{p_end}
+
+
+{p2coldent : {opt cata:ngle(str)}}The angle of the category labels. Default is {cmd:cata(0)} for vertical labels.{p_end}
+
+{p2coldent : {opt cats:ize(str)}}The size of the category labels. Default is {cmd:cats(2.3)}.{p_end}
+
+{p2coldent : {opt catpos:ition(str)}}The position of the category labels. Default is {cmd:catpos(0)} for centered.{p_end}
+
+{p2coldent : {opt catc:olor(str)}}The color of the category labels. Default is {cmd:catc(black)}.{p_end}
+
+{p2coldent : {opt catg:ap(str)}}The gap of the category labels from the base of the alluvial. Default is {cmd:catg(0)}.{p_end}
+
 
 {p2coldent : {opt offset(num)}}The value, in percentage of x-axis width, to extend the x-axis on the right-hand side. Default is {cmd:offset(0)}.
 This option is highly useful if labels are rotated horizontally, and for example, positioned at 3 o'clock.{p_end}
@@ -113,8 +132,8 @@ See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.21
-This release : 19 Oct 2023
+Version      : {bf:alluvial} v1.3
+This release : 10 Feb 2024
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial
@@ -139,5 +158,5 @@ Please submit bugs, errors, feature requests on {browse "https://github.com/asja
 {title:Other visualization packages}
 
 {psee}
-    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb joyplot}, 
+    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb joyplot}, 
 	{helpb marimekko}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb streamplot}, {helpb sunburst}, {helpb treecluster}, {helpb treemap}
