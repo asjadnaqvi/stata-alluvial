@@ -1,6 +1,7 @@
-*! alluvial v1.3 (10 Feb 2024)
+*! alluvial v1.4 (26 Sep 2024)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
 * v1.2  (04 Apr 2023): Minor fixes. If/in added back in.
@@ -15,14 +16,14 @@ program alluvial, sortpreserve
 version 15
  
 	syntax varlist [if] [in] [aw fw pw iw/],  ///
-		[ palette(string) colorby(string) smooth(numlist >=1 <=8) gap(real 2) RECENter(string) SHAREs showmiss alpha(real 75) ]  ///
+		[ palette(string) colorby(string) smooth(numlist >=1 <=8 max=1) gap(real 2) RECENter(string) SHAREs showmiss alpha(real 75) ]  ///
 		[ LABAngle(string) LABSize(string) LABPOSition(string) LABGap(string) SHOWTOTal  ] ///
-		[ VALSize(string)   VALFormat(string) VALGap(string) NOVALues  ]  ///
+		[ VALSize(string) format(string) VALGap(string) NOVALues  ]  ///
 		[ LWidth(string) LColor(string)  ]  ///
 		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
 		[ BOXWidth(string) ] /// // v1.2 
-		[ title(passthru) subtitle(passthru) note(passthru) scheme(passthru) name(passthru) xsize(passthru) ysize(passthru) saving(passthru) ]  ///
-		[ CATGap(string) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string) graphregion(passthru) plotregion(passthru) text(passthru)  ]    // v1.3 options
+		[ CATGap(string) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string)  *  ]  ///   // v1.3 options
+		[ WRAPLABel(numlist >=0 max=1) wrapcat(numlist >=0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30) NOVALLeft NOVALRight percent ]    // v1.4 updates
 		
 
 	// check dependencies
@@ -35,7 +36,7 @@ version 15
 	
 	marksample touse, strok
 
-qui {
+quietly {
 preserve 	
 
 	*keep if `touse'   // this is dropping missing values. DO NOT ENABLE
@@ -59,6 +60,12 @@ preserve
 			}
 		}
 	}
+	
+	
+	if "`novalleft'" != "" & "`novalright'" != "" {
+		display as error "Both {it:novalleft} and {it:novalright} are not allowed. If you want to hide values use the {it:novalues} option instead."
+		exit 198
+	}	
 	
 
 	// store labels for later passthru
@@ -117,42 +124,50 @@ preserve
 	reshape long f t labf labt catf catt, i(id) j(layer)
 	
 	drop id
+	
 	sort layer f
 	gen value = 1
 	
 	if "`showmiss'" != "" {
-		replace labf = "_missing" if f==.
-		replace labt = "_missing" if t==.
+		replace labf = "_missing" if missing(f)
+		replace labt = "_missing" if missing(t)
 		
-		replace f = 99999 if f==.
-		replace t = 99999 if t==.
+		replace f = 99999 if missing(f)
+		replace t = 99999 if missing(t)
 		
 	}
 	else {
-		drop if f==.
-		drop if t==.
+		drop if missing(f)
+		drop if missing(t)
 	}	
 	
-	if "`weight'" != "" {
-		local myweight  [`weight' = `exp']
-	}
+	if "`weight'" != "" local myweight  [`weight' = `exp']
+	
 	
 	
 	collapse (sum) value `myweight', by(f t layer labt labf catf catt)
 	sort layer f t
 
 
-	if "`shares'" != "" {
-		if "`weight'" == "" {
-			replace value =  (value / `obs') 
-			format value %5.2f
-		}
-		else {
+	if "`shares'" != ""  {
 			bysort layer: egen mysum = sum(value)
 			replace value =  (value / mysum) 
-		}
+	}
+	
+	if "`percent'" != "" {
+		bysort layer: egen mysum = sum(value)
+		replace value =  (value / mysum) * 100
 	}
 
+	if "`format'" == "" {
+		if "`shares'"!="" | "`percent'"!="" {
+			local format "%4.2f"	
+		}
+		else {
+			local format "%12.0fc"	
+		}
+	}	
+	
 
 	**** SANKEY ROUTINE BELOW
 
@@ -196,9 +211,10 @@ preserve
 	reshape long x flo val grp y cat lab, i(id layer) j(tt)
 	drop tt
 
+	ren lab _lab
 	
-	order grp id lab x		
-	sort id x lab
+	order grp id _lab x		
+	sort id x _lab
 		
 	
 	sort layer x y
@@ -208,7 +224,7 @@ preserve
 	gen y2 = y
 	drop y
 
-	order layer grp id lab x y1 y2 val
+	order layer grp id _lab x y1 y2 val
 
 	// mark the highest value and the layer
 
@@ -233,13 +249,13 @@ preserve
 	sort x layer flo id
 	egen tag = tag(x flo)
 	bysort x: replace tag = sum(tag)
-	cap drop offset
+	
 	gen offset = (tag - 1) * `propgap' 
 	replace y1 = y1 + offset
 	replace y2 = y2 + offset
 	
 	drop tag offset
-	encode lab, gen(order)
+	encode _lab, gen(order)
 	
 	
 	*** transform the groups to be at the mid points	
@@ -332,8 +348,8 @@ preserve
 	}
 
 
-	replace y1t = y1 if y1t==.
-	replace y2t = y2 if y2t==.
+	replace y1t = y1 if missing(y1t)
+	replace y2t = y2 if missing(y2t)
 
 	drop y1 y2
 
@@ -372,11 +388,11 @@ preserve
 	}
 	
 	cap drop sums
-	bysort layer x lab: egen sums = sum(val)
+	bysort layer x _lab: egen sums = sum(val)
 		
 
 	*** generate the curves	
-	local newobs = 30	
+	local newobs = `n'	
 	expand `newobs'
 	sort id x
 	cap drop xtemp
@@ -482,13 +498,18 @@ preserve
 	}
 
 
-	***** mid points for sankey labels
+	***** mid points for labels
 
 	egen tagp = tag(id)
-	cap gen midp   = .  // outgoing
-	cap gen midpin = .  // incoming
-	cap gen xin = .
 
+	gen midpout   = .  // outgoing
+	gen xout   	  = .  
+	gen valout	  = ""
+	
+	gen midpin   = .  // incoming
+	gen xin      = .
+	gen valin	  = ""
+	
 
 	levelsof id, local(lvls)
 	foreach x of local lvls {
@@ -503,7 +524,18 @@ preserve
 		summ y2 if id==`x'  & x==`xval', meanonly
 		local max = r(max)
 		
-		replace midp = (`min' + `max') / 2 if id==`x' & tagp==1
+		replace midpout = (`min' + `max') / 2 if id==`x' & tagp==1
+		replace xout = x if id==`x' & tagp==1	
+		
+		
+		if "`percent'" != "" {
+			replace valout = string(val, "`format'") + "%" if id==`x' & tagp==1
+		}
+		else {
+			replace valout = string(val, "`format'") if id==`x' & tagp==1
+		}
+		
+		*replace valout = val if id==`x' & tagp==1	
 		
 	// inbound values
 		summ x if id==`x', meanonly
@@ -517,8 +549,19 @@ preserve
 		
 		replace midpin = (`min' + `max') / 2 if id==`x' & tagp==1		
 		replace xin = x + 1 if id==`x' & tagp==1	
+		
+		if "`percent'" != "" {
+			replace valin = string(val, "`format'") + "%" if id==`x' & tagp==1
+		}
+		else {
+			replace valin = string(val, "`format'") if id==`x' & tagp==1
+		}		
+		
+
 	}
 
+		
+		
 		
 	*** fix boxes
 						
@@ -529,7 +572,7 @@ preserve
 	egen wedge = group(x flo)		 
 	egen tagw = tag(wedge)		
 	
-	replace lab = "{it:missing}" if flo== 99999
+	replace _lab = "{it:missing}" if flo== 99999
 	
 	*** tag the category labels
 	
@@ -546,11 +589,24 @@ preserve
 	gen grpnm = ""
 	
 	foreach x of local varlist {
-		replace grpnm = "`mylab`x''" if cat=="`x'" & tagc==1
-
+		replace grpnm = "`mylab`x''" if cat=="`x'" & tagc==1		
 	}
 	
-
+	if "`wrapcat'" != "" {
+		gen _length = length(grpnm) if grpnm!=""
+		summ _length, meanonly		
+		local _wraprounds = floor(`r(max)' / `wrapcat')
+		
+		forval i = 1 / `_wraprounds' {
+			local wraptag = `wrapcat' * `i'
+			replace grpnm = substr(grpnm, 1, `wraptag') + "`=char(10)'" + substr(grpnm, `=`wraptag' + 1', .) if _length > `wraptag' & _length!=.
+		}
+		
+		drop _length
+		
+	}		
+	
+	
 	sort x flo 
 	
 	if "`boxwidth'"    == "" local boxwidth 3.2
@@ -601,9 +657,8 @@ preserve
 			local clr = r(mean) 
 		}
 
-		
 		colorpalette `palette' , nograph `poptions'
-		local boxes `boxes' (rspike ymin ymax x if wedge==`x' & tagw==1, lcolor("`r(p`clr')'%100") lw(`boxwidth')) ||
+		local boxes `boxes' (rspike ymin ymax x if wedge==`x' & tagw==1, lcolor("`r(p`clr')'%100") lw(`boxwidth')) 
 		
 	}
 
@@ -635,8 +690,7 @@ preserve
 		if r(N) > 0 {
 			local clr = r(mean)
 			colorpalette `palette' , nograph `poptions'
-		
-			local shapes `shapes' (rarea y1temp y2temp xtemp if id==`x', lc(`lcolor') lw(`lwidth') fi(100) fcolor("`r(p`clr')'%`alpha'"))  ||
+			local shapes `shapes' (rarea y1temp y2temp xtemp if id==`x', lc(`lcolor') lw(`lwidth') fi(100) fcolor("`r(p`clr')'%`alpha'"))  
 		}
 	}	
 			
@@ -662,18 +716,11 @@ preserve
 	local labcon "if val >= `valcondition'"
 
 	
-	if "`valformat'" == "" {
-		if "`shares'"=="" {
-			local valformat "%12.0fc"	
-		}
-		else {
-			local valformat "%4.3f"	
-		}
-	}
+
 	
 	
+	format val `format'
 	
-	format val `valformat'
 	
 	if "`valgap'" 	 == "" local valgap 2	
 	
@@ -681,28 +728,102 @@ preserve
 	local yrange = r(max)
 	
 	if "`showtotal'" != "" {
-		gen lab2 = lab + " (" + string(sums, "`valformat'") + ")"
-		local lab lab2
-	}
-	else {
-		local lab lab
-	}
-	
-	if "`novalues'" == "" {
-		local values `values' (scatter midp   x   `labcon', msymbol(none) mlabel(val) mlabsize(`valsize') mlabpos(3)             mlabgap(`valgap')                       mlabcolor(`labcolor')) ///
-		
-		local values `values' (scatter midpin xin `labcon', msymbol(none) mlabel(val) mlabsize(`valsize') mlabpos(9)             mlabgap(`valgap')                       mlabcolor(`labcolor')) ///
-		
+		if "`percent'" != "" {
+			replace _lab = _lab + " (" + string(sums, "`format'") + "%)"
+		}
+		else {
+			replace _lab = _lab + " (" + string(sums, "`format'") + ")"
+		}
 	}	
 	
+
+	if "`wraplabel'" != "" {
+		gen _length = length(_lab) if _lab!=""
+		summ _length, meanonly		
+		local _wraprounds = floor(`r(max)' / `wraplabel')
 		
+		forval i = 1 / `_wraprounds' {
+			local wraptag = `wraplabel' * `i'
+			replace _lab = substr(_lab, 1, `wraptag') + "`=char(10)'" + substr(_lab, `=`wraptag' + 1', .) if _length > `wraptag' & _length!=.
+		}
+		
+		drop _length
+		
+	}		
+
+	
+	if "`labprop'" != "" {
+	
+		summ sums if tag==1, meanonly
+		gen double _labwgt = `labsize' * (sums / r(max))^`labscale' if tag==1
+			
+		levelsof _lab, local(lvls)
+			
+		foreach x of local lvls {
+			summ _labwgt if _lab=="`x'" & tag==1, meanonly
+			local labw = r(max)
+				
+			local labels `labels' (scatter midy x if _lab=="`x'" & tag==1, msymbol(none) mlabel(_lab) mlabgap(`labgap') mlabsize(`labw') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
+			
+		}
+	
+	}
+	else {
+		local labels (scatter midy x if  tag==1, msymbol(none) mlabel(_lab) mlabgap(`labgap') mlabsize(`labsize') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
+	}
+	
+	// arc values 
+	
+	if "`valprop'" != "" {
+		summ val if tagp==1, meanonly
+		gen _valwgt = `valsize' * (val / r(max))^`valscale'
+	}
+	
+	
+	if "`novalues'" == "" {
+		if "`novalleft'" == "" {
+			if "`valprop'" != "" {
+				levelsof id if !missing(xout) & tagp==1, local(lvls)
+				
+				foreach x of local lvls {
+					summ _valwgt if id==`x' & tagp==1, meanonly
+					local valw = r(mean)	
+				
+					local valuesL `valuesL' (scatter midpout xout `labcon' & id==`x' & tagp==1, msymbol(none) mlabel(valout) mlabsize(`valw') mlabpos(3) mlabgap(`valgap') mlabcolor(`labcolor')) 
+				}
+			
+			}
+			else {
+				local valuesL `valuesL' (scatter midpout xout `labcon', msymbol(none) mlabel(valout) mlabsize(`valsize') mlabpos(3) mlabgap(`valgap') mlabcolor(`labcolor')) 
+			}	
+		}
+		
+		if "`novalright'" == "" {
+			if "`valprop'" != "" {
+				levelsof id if !missing(xin) & tagp==1, local(lvls)
+				
+				foreach x of local lvls {
+					summ _valwgt if id==`x' & tagp==1, meanonly
+					local valw = r(mean)	
+				
+					local valuesR `valuesR' (scatter midpin xin `labcon' & id==`x' & tagp==1, msymbol(none) mlabel(valin) mlabsize(`valw') mlabpos(9) mlabgap(`valgap') mlabcolor(`labcolor')) 
+				}
+			
+			}
+			else {
+				local valuesR `valuesR' (scatter midpin xin `labcon', msymbol(none) mlabel(valin) mlabsize(`valsize') mlabpos(9) mlabgap(`valgap') mlabcolor(`labcolor')) 
+			}
+		}
+	}	
+	
+	
+
 	// offset
 	
 	summ x, meanonly
 	local xrmin = r(min)
 	local xrmax = r(max) + ((r(max) - r(min)) * `offset' / 100) 
 	
-
 		
 	// FINAL PLOT //
 	
@@ -710,15 +831,15 @@ preserve
 	twoway ///
 		`shapes' ///
 			`boxes' ///
-			(scatter midy x if  tag==1, msymbol(none) mlabel(`lab') mlabgap(`labgap') mlabsize(`labsize') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle')) ///
-			`values' ///
-			(scatter grpy x if tagc==1, msymbol(none) mlabel(grpnm) 		          mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
+			`labels' ///
+			`valuesL' ///
+			`valuesR' ///
+			(scatter grpy x if tagc==1, msymbol(none) mlabel(grpnm) mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
 			, ///
 				legend(off) ///
 					xlabel(, nogrid) ylabel(0 `yrange', nogrid)     ///
 					xscale(off range(`xrmin' `xrmax')) yscale(off)	 ///
-					`title' `subtitle' `note' `scheme' `name' `text'	///
-					`xsize' `ysize' `saving' `graphregion' `plotregion'
+					`options'
 */
 restore
 }	

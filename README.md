@@ -1,16 +1,16 @@
 
-![alluvial-1](https://github.com/asjadnaqvi/stata-alluvial/assets/38498046/7690794e-dc07-482d-9c19-46dc3f658a77)
-
 ![StataMin](https://img.shields.io/badge/stata-2015-blue) ![issues](https://img.shields.io/github/issues/asjadnaqvi/stata-alluvial) ![license](https://img.shields.io/github/license/asjadnaqvi/stata-alluvial) ![Stars](https://img.shields.io/github/stars/asjadnaqvi/stata-alluvial) ![version](https://img.shields.io/github/v/release/asjadnaqvi/stata-alluvial) ![release](https://img.shields.io/github/release-date/asjadnaqvi/stata-alluvial)
-
----
 
 [Installation](#Installation) | [Syntax](#Syntax) | [Examples](#Examples) | [Feedback](#Feedback) | [Change log](#Change-log)
 
 ---
 
-# alluvial v1.3
-(19 Oct 2023)
+![alluvial-1](https://github.com/asjadnaqvi/stata-alluvial/assets/38498046/7690794e-dc07-482d-9c19-46dc3f658a77)
+
+
+
+# alluvial v1.4
+(26 Sep 2025)
 
 ## Installation
 
@@ -22,7 +22,7 @@ SSC (**v1.3**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.3**):
+GitHub (**v1.4**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -61,15 +61,13 @@ The syntax for the latest version is as follows:
 
 ```stata
 alluvial varlist [if] [in] [weight], 
-                [ 
-                  palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) 
+                [ palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) shares percent
                   labangle(str) labsize(str) labposition(str) labcolor(str) labgap(str) 
                   catangle(str) catsize(str) catposition(str) catcolor(str) catgap(str) 
-                  valsize(str) valcondition(num) valformat(str) valgap(str) novalues  showtotal
+                  valsize(str) valcondition(num) valformat(str) valgap(str) novalues showtotal novalleft novalright 
                   lwidth(str) lcolor(str) alpha(num) offset(num) boxwidth(str)
-                  title(str) subtitle(str) note(str) scheme(str) name(str) xsize(num) ysize(num) 
-                  graphregion(str) plotregion(str) text(str) 
-                ]
+                  wraplabel(num) wrapcat(num) valprop labprop valscale(num) labscale(num) n(num) * ]
+
 ```
 
 See the help file `help alluvial` for details.
@@ -86,7 +84,7 @@ where `varlist` are categorival variables given at the unit of observation. If a
 
 ## Examples
 
-Load the Stata dataset
+Load a Stata dataset:
 
 ```
 sysuse nlsw88.dta, clear
@@ -118,28 +116,28 @@ alluvial race married collgrad smsa union, smooth(8)
 
 ### colors
 
-```
+```stata
 alluvial race married collgrad smsa union, colorby(layer)
 ```
 
 <img src="/figures/alluvial2.png" width="100%">
 
-```
+```stata
 alluvial race married collgrad smsa union, palette(carto)
 ```
 
 <img src="/figures/alluvial6.png" width="100%">
 
-```
+```stata
 alluvial race married collgrad smsa union, palette(CET I2)
 ```
 
 <img src="/figures/alluvial6_1.png" width="100%">
 
 
-### shares
+### showmiss
 
-```
+```stata
 alluvial race married collgrad smsa union, shares
 ```
 
@@ -147,7 +145,7 @@ alluvial race married collgrad smsa union, shares
 
 ### showmiss
 
-```
+```stata
 alluvial race married collgrad smsa union, showmiss shares
 ```
 
@@ -156,13 +154,13 @@ alluvial race married collgrad smsa union, showmiss shares
 ### gap
 
 
-```
+```stata
 alluvial race married collgrad smsa union, gap(0)
 ```
 
 <img src="/figures/alluvial5_1.png" width="100%">
 
-```
+```stata
 alluvial race married collgrad smsa union, gap(10)
 ```
 
@@ -170,7 +168,7 @@ alluvial race married collgrad smsa union, gap(10)
 
 ### all together
 
-```
+```stata
 local vars race married collgrad smsa union
 
 alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsize(2) showtot ///
@@ -181,7 +179,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 ### Offset and label rotation (v1.1)
 
-```
+```stata
 local vars race married collgrad smsa union
 alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsize(2) showtot ///
 	xsize(2) ysize(1) lc(black) lw(0.1) ///
@@ -192,7 +190,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 ### Box width (v1.2)
 
-```
+```stata
 local vars race married collgrad smsa union
 alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsize(2) showtot ///
 	xsize(2) ysize(1) lc(black) lw(0.1) ///
@@ -201,6 +199,58 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 <img src="/figures/alluvial9.png" width="100%">
 
+### v1.4 features
+
+```stata
+alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	lw(0.1) lc(black)  ///
+	laba(0) gap(2) novalright showtotal  ///
+	xsize(2) ysize(1) 
+```
+
+<img src="/figures/alluvial10.png" width="100%">
+
+
+
+```stata
+alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	lw(0.1) lc(black)  ///
+	laba(0) labs(1.6) boxw(10) gap(2) novalues ///
+	showtotal wrapcat(20) wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) 	
+```
+
+<img src="/figures/alluvial11.png" width="100%">
+
+
+```stata
+alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
+	showtotal  wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) labprop showmiss
+```
+
+<img src="/figures/alluvial12.png" width="100%">
+
+
+```stata
+alluvial race married collgrad smsa union, smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
+	showtotal wrapcat(20) wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) labprop showmiss percent	
+```
+
+<img src="/figures/alluvial13.png" width="100%">
+
+```stata
+alluvial race married collgrad smsa union [w = wage], smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
+	showtotal wrapcat(20) wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) showmiss labprop percent	
+```
+
+<img src="/figures/alluvial14.png" width="100%">
+
 
 ## Feedback
 
@@ -208,6 +258,18 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+
+**v1.4 (26 Sep 2024)**
+- Added `wraplabel()` and `wrapcat()` options that allow users to wrap long labels after specific characters.
+- Added `valprop` and `labprop` to scale labels proportional to their values. The scaling can be adjusted using `labscale()` and `valscale()` options.
+- Added `novalleft` and `novalright` to hide left (outgoing) and right (incoming) labels respectively.
+- Added `percent` which now shows percentages based on column (layer) height. Note that `shares` is still available but will scale to [0,1] range.
+- Added option `n()` to control how many points are used for calculating the sigmoid curves.
+- All generic `twoway graph` options can now be passed onto `alluvial` such as `plotregion()`, `graphregion()` and many others for more control.
+- Improvements to how weights are used in the command.
+- Major code cleanup resulting in major speed improvements.
+
 
 **v1.3 (10 Feb 2024)**
 - Options added to control category variables including size, color, gap, angle, position.
