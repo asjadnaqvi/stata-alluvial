@@ -135,15 +135,7 @@ alluvial race married collgrad smsa union, palette(CET I2)
 <img src="/figures/alluvial6_1.png" width="100%">
 
 
-### showmiss
-
-```stata
-alluvial race married collgrad smsa union, shares
-```
-
-<img src="/figures/alluvial3.png" width="100%">
-
-### showmiss
+### showmiss + shares
 
 ```stata
 alluvial race married collgrad smsa union, showmiss shares
