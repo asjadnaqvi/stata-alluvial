@@ -50,7 +50,7 @@ You can also push the scheme directly into the graph using the `scheme(schemenam
 
 I also prefer narrow fonts in figures with long labels. You can change this as follows:
 
-```
+```stata
 graph set window fontface "Arial Narrow"
 ```
 
@@ -67,7 +67,6 @@ alluvial varlist [if] [in] [weight],
                   valsize(str) valcondition(num) valformat(str) valgap(str) novalues showtotal novalleft novalright 
                   lwidth(str) lcolor(str) alpha(num) offset(num) boxwidth(str)
                   wraplabel(num) wrapcat(num) valprop labprop valscale(num) labscale(num) n(num) * ]
-
 ```
 
 See the help file `help alluvial` for details.
@@ -86,14 +85,14 @@ where `varlist` are categorival variables given at the unit of observation. If a
 
 Load a Stata dataset:
 
-```
+```stata
 sysuse nlsw88.dta, clear
 ```
 
 Let's test the `alluvial` command:
 
 
-```
+```stata
 alluvial race married collgrad smsa union
 ```
 
@@ -101,13 +100,13 @@ alluvial race married collgrad smsa union
 
 ### Smooth
 
-```
+```stata
 alluvial race married collgrad smsa union, smooth(1)
 ```
 
 <img src="/figures/alluvial1_1.png" width="100%">
 
-```
+```stata
 alluvial race married collgrad smsa union, smooth(8)
 ```
 
@@ -138,10 +137,23 @@ alluvial race married collgrad smsa union, palette(CET I2)
 ### showmiss + shares
 
 ```stata
+alluvial race married collgrad smsa union, shares
+```
+
+<img src="/figures/alluvial3.png" width="100%">
+
+
+```stata
 alluvial race married collgrad smsa union, showmiss shares
 ```
 
 <img src="/figures/alluvial4.png" width="100%">
+
+```stata
+alluvial race married collgrad smsa union, showmiss shares colorby(layer)
+```
+
+<img src="/figures/alluvial4_1.png" width="100%">
 
 ### gap
 

@@ -1,7 +1,7 @@
 *! alluvial v1.4 (26 Sep 2024)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
-* v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added.
+* v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
 * v1.2  (04 Apr 2023): Minor fixes. If/in added back in.
@@ -147,16 +147,19 @@ preserve
 	
 	collapse (sum) value `myweight', by(f t layer labt labf catf catt)
 	sort layer f t
-
+	
+	
 
 	if "`shares'" != ""  {
-			bysort layer: egen mysum = sum(value)
-			replace value =  (value / mysum) 
+			bysort layer: egen _mysum = sum(value)
+			summ _mysum, meanonly
+			replace value =  (value / `r(max)') 
 	}
 	
 	if "`percent'" != "" {
-		bysort layer: egen mysum = sum(value)
-		replace value =  (value / mysum) * 100
+		bysort layer: egen _mysum = sum(value)
+		summ _mysum, meanonly
+		replace value =  (value / `r(max)') * 100
 	}
 
 	if "`format'" == "" {
@@ -168,7 +171,9 @@ preserve
 		}
 	}	
 	
-
+	
+	
+	
 	**** SANKEY ROUTINE BELOW
 
 	ren layer x1
