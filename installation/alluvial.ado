@@ -1,6 +1,7 @@
-*! alluvial v1.4 (26 Sep 2024)
+*! alluvial v1.41 (28 Sep 2024)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.41 (28 Sep 2024): added better wrappers
 * v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
@@ -23,7 +24,7 @@ version 15
 		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
 		[ BOXWidth(string) ] /// // v1.2 
 		[ CATGap(string) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string)  *  ]  ///   // v1.3 options
-		[ WRAPLABel(numlist >=0 max=1) wrapcat(numlist >=0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30) NOVALLeft NOVALRight percent ]    // v1.4 updates
+		[ WRAPLABel(numlist >0 max=1) wrapcat(numlist >0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30) NOVALLeft NOVALRight percent ]    // v1.4 updates
 		
 
 	// check dependencies
@@ -33,6 +34,8 @@ version 15
 		exit
 	}
 	
+	cap findfile labsplit.ado
+		if _rc != 0 quietly ssc install graphfunctions, replace		
 	
 	marksample touse, strok
 
@@ -597,18 +600,12 @@ preserve
 		replace grpnm = "`mylab`x''" if cat=="`x'" & tagc==1		
 	}
 	
+	
+	local catlab grpnm
+	
 	if "`wrapcat'" != "" {
-		gen _length = length(grpnm) if grpnm!=""
-		summ _length, meanonly		
-		local _wraprounds = floor(`r(max)' / `wrapcat')
-		
-		forval i = 1 / `_wraprounds' {
-			local wraptag = `wrapcat' * `i'
-			replace grpnm = substr(grpnm, 1, `wraptag') + "`=char(10)'" + substr(grpnm, `=`wraptag' + 1', .) if _length > `wraptag' & _length!=.
-		}
-		
-		drop _length
-		
+		labsplit grpnm, wrap(`wrapcat') gen(grplab)
+		local catlab grplab
 	}		
 	
 	
@@ -742,20 +739,14 @@ preserve
 	}	
 	
 
+	local labval _lab
+	
 	if "`wraplabel'" != "" {
-		gen _length = length(_lab) if _lab!=""
-		summ _length, meanonly		
-		local _wraprounds = floor(`r(max)' / `wraplabel')
-		
-		forval i = 1 / `_wraprounds' {
-			local wraptag = `wraplabel' * `i'
-			replace _lab = substr(_lab, 1, `wraptag') + "`=char(10)'" + substr(_lab, `=`wraptag' + 1', .) if _length > `wraptag' & _length!=.
-		}
-		
-		drop _length
-		
+		labsplit _lab, wrap(`wraplabel') gen(_lab2)
+		local labval _lab2
 	}		
 
+	
 	
 	if "`labprop'" != "" {
 	
@@ -768,13 +759,13 @@ preserve
 			summ _labwgt if _lab=="`x'" & tag==1, meanonly
 			local labw = r(max)
 				
-			local labels `labels' (scatter midy x if _lab=="`x'" & tag==1, msymbol(none) mlabel(_lab) mlabgap(`labgap') mlabsize(`labw') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
+			local labels `labels' (scatter midy x if _lab=="`x'" & tag==1, msymbol(none) mlabel(`labval') mlabgap(`labgap') mlabsize(`labw') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
 			
 		}
 	
 	}
 	else {
-		local labels (scatter midy x if  tag==1, msymbol(none) mlabel(_lab) mlabgap(`labgap') mlabsize(`labsize') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
+		local labels (scatter midy x if  tag==1, msymbol(none) mlabel(`labval') mlabgap(`labgap') mlabsize(`labsize') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
 	}
 	
 	// arc values 
@@ -839,7 +830,7 @@ preserve
 			`labels' ///
 			`valuesL' ///
 			`valuesR' ///
-			(scatter grpy x if tagc==1, msymbol(none) mlabel(grpnm) mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
+			(scatter grpy x if tagc==1, msymbol(none) mlabel(`catlab') mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
 			, ///
 				legend(off) ///
 					xlabel(, nogrid) ylabel(0 `yrange', nogrid)     ///

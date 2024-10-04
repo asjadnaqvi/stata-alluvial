@@ -33,9 +33,9 @@ They still needed to be fully tested.{p_end}
 each layer a unique color. The {it:level} option will give each category a unique color, even if they exist across multiple layers. 
 The default value is {opt colorby(level)}.{p_end}
 
-{p2coldent : {opt shares}}Convert column values into shares. Weighted if weights specified.{p_end}
+{p2coldent : {opt shares}}Convert column values into shares. Weighted if {opt weights} are specified.{p_end}
 
-{p2coldent : {opt shares}}Convert column values into percentages. Weighted if weights specified.{p_end}
+{p2coldent : {opt percent}}Convert column values into percentages. Weighted if {opt weights} are specified.{p_end}
 
 {p2coldent : {opt showmiss}}Add a missing values category on the graph. The shares of existing categories plus the missing category for each layer add up to one.{p_end}
 
@@ -111,7 +111,7 @@ to one are almost linear scaling. Advance option, use carefully.{p_end}
 {p2coldent : {opt labscale(num)}}Scale factor of {opt labprop}. Default value is {opt labscale(0.3333)}. Values closer to zero result in more exponential scaling, while values closer
 to one are almost linear scaling. Advance option, use carefully.{p_end}
 
-{p2coldent : {opt n(num)}}Number of points to evaluate the flow curves. Default value is {opt n(30)}. This is sufficient unless a very large image is expected to be exported.{p_end}
+{p2coldent : {opt n(num)}}Number of points for evaluating the sigmoid function for the flows. Default value is {opt n(30)}.{p_end}
 
 {p2coldent : {opt *}}All other standard twoway options not elsewhere specified.{p_end}
 
@@ -154,7 +154,7 @@ Please submit bugs, errors, feature requests on {browse "https://github.com/asja
 
 {title:Citation guidelines}
 
-Suggested citation guidlines for this package:
+Suggested citation for this package:
 
 Naqvi, A. (2024). Stata package "alluvial" version 1.4. Release date 26 September 2024. https://github.com/asjadnaqvi/stata-alluvial.
 
@@ -177,7 +177,7 @@ Naqvi, A. (2024). Stata package "alluvial" version 1.4. Release date 26 Septembe
 {title:Other packages}
 
 {psee}
-    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb joyplot}, 
+    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions}, {helpb joyplot}, 
 	{helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, {helpb sunburst}, {helpb ternary}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
 
 or visit {browse "https://github.com/asjadnaqvi":GitHub}.
