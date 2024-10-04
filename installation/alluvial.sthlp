@@ -121,8 +121,6 @@ to one are almost linear scaling. Advance option, use carefully.{p_end}
 
 {title:Dependencies}
 
-The {browse "http://repec.sowi.unibe.ch/stata/palettes/index.html":palettes} package (Jann 2018, 2022) is required for {cmd:alluvial}:
-
 {stata ssc install palettes, replace}
 {stata ssc install colrspace, replace}
 

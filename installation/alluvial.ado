@@ -1,7 +1,6 @@
-*! alluvial v1.41 (28 Sep 2024)
+*! alluvial v1.4 (26 Sep 2024)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
-* v1.41 (28 Sep 2024): added better wrappers
 * v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
