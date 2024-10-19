@@ -15,7 +15,7 @@
                 {cmd:[} {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) {cmdab:shares} {cmdab:percent}
                   {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labc:olor}({it:str}) {cmdab:labg:ap}({it:str}) 
                   {cmdab:cata:ngle}({it:str}) {cmdab:cats:ize}({it:str}) {cmdab:catpos:ition}({it:str}) {cmdab:catc:olor}({it:str}) {cmdab:catg:ap}({it:str}) 
-                  {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmdab:valf:ormat}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues} {cmdab:showtot:al} {cmdab:novall:eft} {cmdab:novalr:ight} 
+                  {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmd:format}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues} {cmdab:showtot:al} {cmdab:novall:eft} {cmdab:novalr:ight} 
                   {cmdab:lw:idth}({it:str}) {cmdab:lc:olor}({it:str}) {cmd:alpha}({it:num}) {cmd:offset}({it:num}) {cmdab:boxw:idth}({it:str})
                   {cmdab:wraplab:el}({it:num}) {cmdab:wrapcat}({it:num}) {cmd:valprop} {cmd:labprop} {cmdab:valscale}({it:num}) {cmdab:labscale}({it:num}) {cmdab:n}({it:num}) {cmdab:*} {cmd:]}
 
@@ -99,7 +99,7 @@ If the label angle is change to horitzontal or the label position is changed fro
 {p2coldent : {opt valcond:ition(num)}}The condition for showing value labels. For example, if we only want to display categories with a greater than a value of 100, 
 we can specify {opt valcond(100)}. If the {opt share} or {opt percent} are used, then please specify the thresholds accordingly (out of 1 or 100 respectively).{p_end}
 
-{p2coldent : {opt valf:ormat(str)}}The format of the displayed values. Default is {opt valf(%12.0f)}.{p_end}
+{p2coldent : {opt format(str)}}The format of the displayed values. Defaults are {opt format(%12.0f)} and {opt format(%4.2f)} for percentages.{p_end}
 
 {p2coldent : {opt valprop}}Show flow labels proportional to their value.{p_end}
 
@@ -123,7 +123,7 @@ to one are almost linear scaling. Advance option, use carefully.{p_end}
 
 {stata ssc install palettes, replace}
 {stata ssc install colrspace, replace}
-
+{stata ssc install graphfunctions, replace}
 
 {title:Examples}
 

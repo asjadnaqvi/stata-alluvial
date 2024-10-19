@@ -64,7 +64,7 @@ alluvial varlist [if] [in] [weight],
                 [ palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) shares percent
                   labangle(str) labsize(str) labposition(str) labcolor(str) labgap(str) 
                   catangle(str) catsize(str) catposition(str) catcolor(str) catgap(str) 
-                  valsize(str) valcondition(num) valformat(str) valgap(str) novalues showtotal novalleft novalright 
+                  valsize(str) valcondition(num) format(str) valgap(str) novalues showtotal novalleft novalright 
                   lwidth(str) lcolor(str) alpha(num) offset(num) boxwidth(str)
                   wraplabel(num) wrapcat(num) valprop labprop valscale(num) labscale(num) n(num) * ]
 ```
