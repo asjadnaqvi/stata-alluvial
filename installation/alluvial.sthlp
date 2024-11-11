@@ -1,7 +1,7 @@
 {smcl}
-{* 26Sep2024}{...}
+{* 11Nov2024}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.4 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.41 (GitHub)}}
 
 {hline}
 
@@ -12,7 +12,7 @@
 {p 8 15 2}
 
 {cmd:alluvial} {it:varlist} {ifin} {weight}, 
-                {cmd:[} {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) {cmdab:shares} {cmdab:percent}
+                {cmd:[} {cmd:value}({it:numvar}) {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) {cmdab:shares} {cmdab:percent}
                   {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labc:olor}({it:str}) {cmdab:labg:ap}({it:str}) 
                   {cmdab:cata:ngle}({it:str}) {cmdab:cats:ize}({it:str}) {cmdab:catpos:ition}({it:str}) {cmdab:catc:olor}({it:str}) {cmdab:catg:ap}({it:str}) 
                   {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmd:format}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues} {cmdab:showtot:al} {cmdab:novall:eft} {cmdab:novalr:ight} 
@@ -26,6 +26,8 @@
 {p2coldent : {opt alluvial} varlist}The command requires a set of categorical variables. The command tabulates the combinations based on the number of rows for each category.
 If a variable has more than 20 categories, the program will throw and error and exit. Weights are allowed but use them cautiously.
 They still needed to be fully tested.{p_end}
+
+{p2coldent : {opt value(numvar)}}Define a numerical variable that will be aggregated over the categories for the flows. The default is the count of rows.{p_end}
 
 {p2coldent : {opt palette(name)}}Color name is any named scheme defined in the {stata help colorpalette:colorpalette} package. Default is {stata colorpalette tableau:{it:tableau}}.{p_end}
 
@@ -132,8 +134,8 @@ See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.4
-This release : 26 Sep 2024
+Version      : {bf:alluvial} v1.41
+This release : 11 Nov 2024
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial

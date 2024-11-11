@@ -1,6 +1,7 @@
-*! alluvial v1.4 (26 Sep 2024)
+*! alluvial v1.41 (11 Nov 2024)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.41	(11 Nov 2024): value(numvar) for a flow var. fixed string checks.
 * v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
@@ -16,7 +17,7 @@ program alluvial, sortpreserve
 version 15
  
 	syntax varlist [if] [in] [aw fw pw iw/],  ///
-		[ palette(string) colorby(string) smooth(numlist >=1 <=8 max=1) gap(real 2) RECENter(string) SHAREs showmiss alpha(real 75) ]  ///
+		[ value(varlist max=1 numeric) palette(string) colorby(string) smooth(numlist >=1 <=8 max=1) gap(real 2) RECENter(string) SHAREs showmiss alpha(real 75) ]  ///
 		[ LABAngle(string) LABSize(string) LABPOSition(string) LABGap(string) SHOWTOTal  ] ///
 		[ VALSize(string) format(string) VALGap(string) NOVALues  ]  ///
 		[ LWidth(string) LColor(string)  ]  ///
@@ -42,27 +43,28 @@ quietly {
 preserve 	
 
 	*keep if `touse'   // this is dropping missing values. DO NOT ENABLE
-	keep `varlist' `exp'
+	keep `varlist' `exp' `value'
 
 	foreach x of local varlist {
 		
-		cap confirm numeric var `x'  // convert from numeric to string.
-		if _rc!=0 {
-			decode `x', gen(`x'2)
+
+		cap confirm numeric var `x' // check if numeric
+	
+		if _rc!=0 {  // if string, convert to numeric.
+			encode `x', gen(`x'2)
 			drop `x'
 			ren `x'2 `x'
 		}
-		else { 	
-			qui levelsof `x'
 
-			if `r(r)' > 20 {
-				di as error "`x' has more than 20 categories. The variable might be continuous."
-				di as error "Please simplify or drop the variable."
-				exit
-			}
-		}
+		levelsof `x'
+
+		if `r(r)' > 20 {
+			di as error "Variable {it:`x'} has more than 20 categories. The variable might be continuous."
+			di as error "Please simplify or drop the variable."
+			exit
+		}		
 	}
-	
+
 	
 	if "`novalleft'" != "" & "`novalright'" != "" {
 		display as error "Both {it:novalleft} and {it:novalright} are not allowed. If you want to hide values use the {it:novalues} option instead."
@@ -79,7 +81,7 @@ preserve
 			local mylab`x' `x'
 		}
 	}
-
+	
 	
 	gen temp = 1
 	local items : word count `varlist'
@@ -128,7 +130,12 @@ preserve
 	drop id
 	
 	sort layer f
-	gen value = 1
+	
+	if "`value'" == "" {
+		gen _value = 1
+		local value _value
+	}
+	
 	
 	if "`showmiss'" != "" {
 		replace labf = "_missing" if missing(f)
@@ -147,21 +154,21 @@ preserve
 	
 	
 	
-	collapse (sum) value `myweight', by(f t layer labt labf catf catt)
+	collapse (sum) `value' `myweight', by(f t layer labt labf catf catt)
 	sort layer f t
 	
 	
 
 	if "`shares'" != ""  {
-			bysort layer: egen _mysum = sum(value)
+			bysort layer: egen _mysum = sum(`value')
 			summ _mysum, meanonly
-			replace value =  (value / `r(max)') 
+			replace `value' =  (`value' / `r(max)') 
 	}
 	
 	if "`percent'" != "" {
-		bysort layer: egen _mysum = sum(value)
+		bysort layer: egen _mysum = sum(`value')
 		summ _mysum, meanonly
-		replace value =  (value / `r(max)') * 100
+		replace `value' =  (`value' / `r(max)') * 100
 	}
 
 	if "`format'" == "" {
@@ -173,9 +180,7 @@ preserve
 		}
 	}	
 	
-	
-	
-	
+
 	**** SANKEY ROUTINE BELOW
 
 	ren layer x1
@@ -184,7 +189,7 @@ preserve
 
 	gen x2 = x1 + 1
 	
-	ren value val1
+	ren `value' val1
 	gen val2 = val1
 	
 	ren catf cat1
@@ -563,13 +568,8 @@ preserve
 		else {
 			replace valin = string(val, "`format'") if id==`x' & tagp==1
 		}		
-		
-
 	}
 
-		
-		
-		
 	*** fix boxes
 						
 	sort layer grp x y1 y2

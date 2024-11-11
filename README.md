@@ -9,8 +9,8 @@
 
 
 
-# alluvial v1.4
-(26 Sep 2024)
+# alluvial v1.41
+(11 Nov 2024)
 
 ## Installation
 
@@ -22,7 +22,7 @@ SSC (**v1.4**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.4**):
+GitHub (**v1.41**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -61,7 +61,7 @@ The syntax for the latest version is as follows:
 
 ```stata
 alluvial varlist [if] [in] [weight], 
-                [ palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) shares percent
+                [ value(var) palette(str) colorby(layer|level) smooth(1-8) gap(num) recenter(mid|bot|top) shares percent
                   labangle(str) labsize(str) labposition(str) labcolor(str) labgap(str) 
                   catangle(str) catsize(str) catposition(str) catcolor(str) catgap(str) 
                   valsize(str) valcondition(num) format(str) valgap(str) novalues showtotal novalleft novalright 
@@ -256,6 +256,19 @@ alluvial race married collgrad smsa union [w = wage], smooth(8) alpha(60) palett
 <img src="/figures/alluvial14.png" width="100%">
 
 
+### v1.41 
+
+```stata
+alluvial race married collgrad smsa union, value(wage) smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
+	showtotal wrapcat(20) wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) showmiss labprop percent	
+```
+
+<img src="/figures/alluvial15.png" width="100%">
+
+
+
 ## Feedback
 
 Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to report errors, feature enhancements, and/or other requests.
@@ -263,6 +276,10 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 ## Change log
 
+**v1.41 (11 Nov 2024)**
+- Added `value()` to allow users to specify a numeric variable that can be aggregated over the categories.
+- Fixed a bug where string variable checks were not working properly.
+- Minor improvements to the code.
 
 **v1.4 (26 Sep 2024)**
 - Added `wraplabel()` and `wrapcat()` options that allow users to wrap long labels after specific characters.
