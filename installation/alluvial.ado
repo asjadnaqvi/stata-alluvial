@@ -1,7 +1,7 @@
 *! alluvial v1.41 (11 Nov 2024)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
-* v1.41	(11 Nov 2024): value(numvar) for a flow var. fixed string checks.
+* v1.41	(11 Nov 2024): value(numvar) for a flow var. fixed string checks. if condition fixed.
 * v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
 * v1.21 (19 Oct 2023): Fixed the showmiss bug (reported by Matthias Schonlau)
@@ -42,7 +42,7 @@ version 15
 quietly {
 preserve 	
 
-	*keep if `touse'   // this is dropping missing values. DO NOT ENABLE
+	keep if `touse'   
 	keep `varlist' `exp' `value'
 
 	foreach x of local varlist {
