@@ -9,8 +9,8 @@
 
 
 
-# alluvial v1.41
-(11 Nov 2024)
+# alluvial v1.42
+(06 Mar 2025)
 
 ## Installation
 
@@ -22,7 +22,7 @@ SSC (**v1.41**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.41**):
+GitHub (**v1.42**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -275,6 +275,9 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+**v1.42 (06 Mar 2025)**
+- The program was dropping missing values. This has been fixed.
 
 **v1.41 (11 Nov 2024)**
 - Added `value()` to allow users to specify a numeric variable that can be aggregated over the categories.

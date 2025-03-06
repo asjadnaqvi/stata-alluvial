@@ -1,6 +1,7 @@
-*! alluvial v1.41 (11 Nov 2024)
+*! alluvial v1.42 (06 Mar 2025)
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.42	(06 Mar 2025): fixed the program dropping missing values. fixed label wrapping for missing.
 * v1.41	(11 Nov 2024): value(numvar) for a flow var. fixed string checks. if condition fixed.
 * v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
 * v1.3	(10 Feb 2024): Better control over category variables.
@@ -12,7 +13,7 @@
 cap program drop alluvial
 
 
-program alluvial, sortpreserve
+program alluvial, // sortpreserve
 
 version 15
  
@@ -37,12 +38,12 @@ version 15
 	cap findfile labsplit.ado
 		if _rc != 0 quietly ssc install graphfunctions, replace		
 	
-	marksample touse, strok
-
+	marksample touse, strok novarlist
+	
 quietly {
 preserve 	
 
-	keep if `touse'   
+	keep if `touse'   // do not enable. drops missing values.
 	keep `varlist' `exp' `value'
 
 	foreach x of local varlist {
@@ -70,6 +71,8 @@ preserve
 		display as error "Both {it:novalleft} and {it:novalright} are not allowed. If you want to hide values use the {it:novalues} option instead."
 		exit 198
 	}	
+	
+	
 	
 
 	// store labels for later passthru
@@ -121,11 +124,15 @@ preserve
 	
 	drop `varlist'
 	
+	
+	
 	drop temp
 	gen id = _n
 	order id
 
 	reshape long f t labf labt catf catt, i(id) j(layer)
+	
+	
 	
 	drop id
 	
@@ -135,6 +142,8 @@ preserve
 		gen _value = 1
 		local value _value
 	}
+	
+	
 	
 	
 	if "`showmiss'" != "" {
@@ -579,7 +588,7 @@ preserve
 	egen wedge = group(x flo)		 
 	egen tagw = tag(wedge)		
 	
-	replace _lab = "{it:missing}" if flo== 99999
+	replace _lab = "missing" if flo== 99999
 	
 	*** tag the category labels
 	
@@ -730,10 +739,10 @@ preserve
 	
 	if "`showtotal'" != "" {
 		if "`percent'" != "" {
-			replace _lab = _lab + " (" + string(sums, "`format'") + "%)"
+			replace _lab = _lab + " (" + string(sums, "`format'") + "%)" if tag==1
 		}
 		else {
-			replace _lab = _lab + " (" + string(sums, "`format'") + ")"
+			replace _lab = _lab + " (" + string(sums, "`format'") + ")" if tag==1
 		}
 	}	
 	
@@ -745,6 +754,10 @@ preserve
 		local labval _lab2
 	}		
 
+	
+	// add italics to missing
+	
+	replace `labval' = subinstr(`labval', "missing", "{it:missing}", .)
 	
 	
 	if "`labprop'" != "" {
@@ -836,10 +849,11 @@ preserve
 					xscale(off range(`xrmin' `xrmax')) yscale(off)	 ///
 					`options'
 */
+
 restore
 }	
 
- 
+
 end
 
 

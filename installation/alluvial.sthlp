@@ -1,7 +1,7 @@
 {smcl}
-{* 11Nov2024}{...}
+{* 06Mar2025}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.41 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.42 (GitHub)}}
 
 {hline}
 
@@ -134,8 +134,8 @@ See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.41
-This release : 11 Nov 2024
+Version      : {bf:alluvial} v1.42
+This release : 06 Mar 2025
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial
@@ -154,17 +154,8 @@ Please submit bugs, errors, feature requests on {browse "https://github.com/asja
 
 {title:Citation guidelines}
 
-Suggested citation for this package:
-
-Naqvi, A. (2024). Stata package "alluvial" version 1.4. Release date 26 September 2024. https://github.com/asjadnaqvi/stata-alluvial.
-
-@software{alluvial,
-   author = {Naqvi, Asjad},
-   title = {Stata package ``alluvial''},
-   url = {https://github.com/asjadnaqvi/stata-alluvial},
-   version = {1.4},
-   date = {2024-09-26}
-}
+See {browse "https://ideas.repec.org/c/boc/bocode/s459153.html"} for the official SSC citation. 
+Please note that the GitHub version might be newer than the SSC version.
 
 
 {title:References}
@@ -174,13 +165,13 @@ Naqvi, A. (2024). Stata package "alluvial" version 1.4. Release date 26 Septembe
 {p 4 8 2}Jann, B. (2022). {browse "https://ideas.repec.org/p/bss/wpaper/43.html":Color palettes for Stata graphics: an update}. University of Bern Social Sciences Working Papers No. 43. 
 
 
-{title:Other packages}
+{title:Other visualization packages}
 
 {psee}
-    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions}, {helpb joyplot}, 
-	{helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, {helpb sunburst}, {helpb ternary}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
+    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions}, {helpb geoboundary}, {helpb geoflow}, {helpb joyplot}, 
+	{helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, {helpb sunburst}, {helpb ternary}, {helpb tidytuesday}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
 
-or visit {browse "https://github.com/asjadnaqvi":GitHub}.
+Visit {browse "https://github.com/asjadnaqvi":GitHub} for further information.	
 
 
 
