@@ -9,7 +9,7 @@
 
 
 
-# alluvial v1.42
+# alluvial v1.5
 (06 Mar 2025)
 
 ## Installation
@@ -22,7 +22,7 @@ SSC (**v1.42**):
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.42**):
+GitHub (**v1.5**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -185,6 +185,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 ```stata
 local vars race married collgrad smsa union
+
 alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsize(2) showtot ///
 	xsize(2) ysize(1) lc(black) lw(0.1) ///
 	laba(0) labpos(3) noval offset(6)
@@ -196,6 +197,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 
 ```stata
 local vars race married collgrad smsa union
+
 alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsize(2) showtot ///
 	xsize(2) ysize(1) lc(black) lw(0.1) ///
 	laba(0) labpos(3) noval offset(6) boxwid(6)
@@ -206,7 +208,7 @@ alluvial `vars',  smooth(8) alpha(60) palette(CET C7) gap(10) valcond(100) valsi
 ### v1.4 features
 
 ```stata
-alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+alluvial race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
 	lw(0.1) lc(black)  ///
 	laba(0) gap(2) novalright showtotal  ///
 	xsize(2) ysize(1) 
@@ -217,7 +219,7 @@ alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6)
 
 
 ```stata
-alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+alluvial race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
 	lw(0.1) lc(black)  ///
 	laba(0) labs(1.6) boxw(10) gap(2) novalues ///
 	showtotal wrapcat(20) wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
@@ -237,6 +239,36 @@ alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6)
 <img src="/figures/alluvial12.png" width="100%">
 
 
+### v1.5 options: percent vs percent2
+
+While `percent` converts the values to percentages proportional to column heights `percent2` shows a pure columnwise share.
+
+```stata
+alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
+	showtotal  wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) labprop percent
+```
+
+<img src="/figures/alluvial12_1.png" width="100%">
+
+
+```stata
+alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
+	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
+	showtotal  wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
+	xsize(2) ysize(1) labprop percent2
+```
+
+<img src="/figures/alluvial12_2.png" width="100%">
+
+
+
+### v1.41 
+
+
+
+
 ```stata
 alluvial race married collgrad smsa union, smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
 	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
@@ -250,13 +282,10 @@ alluvial race married collgrad smsa union, smooth(8) alpha(60) palette(CET C6) v
 alluvial race married collgrad smsa union [w = wage], smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
 	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
 	showtotal wrapcat(20) wraplab(15) catgap(8) plotregion(margin(b+5 l+10 r+10)) ///
-	xsize(2) ysize(1) showmiss labprop percent	
+	xsize(2) ysize(1) showmiss labprop percent		
 ```
 
 <img src="/figures/alluvial14.png" width="100%">
-
-
-### v1.41 
 
 ```stata
 alluvial race married collgrad smsa union, value(wage) smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
@@ -275,6 +304,12 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+**v1.5 (27 Apr 2025)**
+- Complete rework of the base code. This command should now run much faster.
+- Added option `percent2`. This shows percentages based on column totals.
+- `catgap` is now a percentage of column height to make it consistent across actual values and percentages.
+- Several bug fixes.
 
 **v1.42 (06 Mar 2025)**
 - The program was dropping missing values. This has been fixed.

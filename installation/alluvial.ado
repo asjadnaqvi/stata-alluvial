@@ -1,6 +1,7 @@
-*! alluvial v1.42 (06 Mar 2025)
+*! alluvial v1.5 (27 Apr 2025):
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.5	(27 Apr 2025): reworked the baseline routines. better handling of missings.
 * v1.42	(06 Mar 2025): fixed the program dropping missing values. fixed label wrapping for missing.
 * v1.41	(11 Nov 2024): value(numvar) for a flow var. fixed string checks. if condition fixed.
 * v1.4	(26 Sep 2024): valformat is now format(). wrap options added, labprop options added, novall, novalr options added.
@@ -13,7 +14,7 @@
 cap program drop alluvial
 
 
-program alluvial, // sortpreserve
+program alluvial, sortpreserve
 
 version 15
  
@@ -24,8 +25,8 @@ version 15
 		[ LWidth(string) LColor(string)  ]  ///
 		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
 		[ BOXWidth(string) ] /// // v1.2 
-		[ CATGap(string) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string)  *  ]  ///   // v1.3 options
-		[ WRAPLABel(numlist >0 max=1) wrapcat(numlist >0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30) NOVALLeft NOVALRight percent ]    // v1.4 updates
+		[ CATGap(real 4) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string)  *  ]  ///   // v1.3 options
+		[ WRAPLABel(numlist >0 max=1) wrapcat(numlist >0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30) NOVALLeft NOVALRight percent percent2 ]    // v1.4 updates
 		
 
 	// check dependencies
@@ -46,9 +47,9 @@ preserve
 	keep if `touse'   // do not enable. drops missing values.
 	keep `varlist' `exp' `value'
 
+	
 	foreach x of local varlist {
-		
-
+	
 		cap confirm numeric var `x' // check if numeric
 	
 		if _rc!=0 {  // if string, convert to numeric.
@@ -61,7 +62,7 @@ preserve
 
 		if `r(r)' > 20 {
 			di as error "Variable {it:`x'} has more than 20 categories. The variable might be continuous."
-			di as error "Please simplify or drop the variable."
+			di as error "Reduce the categories or drop the variable."
 			exit
 		}		
 	}
@@ -71,8 +72,6 @@ preserve
 		display as error "Both {it:novalleft} and {it:novalright} are not allowed. If you want to hide values use the {it:novalues} option instead."
 		exit 198
 	}	
-	
-	
 	
 
 	// store labels for later passthru
@@ -87,12 +86,12 @@ preserve
 	
 	
 	gen temp = 1
-	local items : word count `varlist'
-	local items2 = `items' - 1
+	local varcount : word count `varlist'
+	local items2 = `varcount' - 1
 
 	
 	tokenize `varlist'
-	
+
 	local obs = _N
 	
 	
@@ -125,13 +124,12 @@ preserve
 	drop `varlist'
 	
 	
-	
 	drop temp
 	gen id = _n
 	order id
 
-	reshape long f t labf labt catf catt, i(id) j(layer)
 	
+	reshape long f t labf labt catf catt, i(id) j(layer)
 	
 	
 	drop id
@@ -144,34 +142,27 @@ preserve
 	}
 	
 	
+	replace f = 99999 if missing(f)
+	replace t = 99999 if missing(t)	
 	
-	
-	if "`showmiss'" != "" {
-		replace labf = "_missing" if missing(f)
-		replace labt = "_missing" if missing(t)
-		
-		replace f = 99999 if missing(f)
-		replace t = 99999 if missing(t)
-		
-	}
-	else {
-		drop if missing(f)
-		drop if missing(t)
-	}	
-	
+
 	if "`weight'" != "" local myweight  [`weight' = `exp']
 	
-	
-	
+
 	collapse (sum) `value' `myweight', by(f t layer labt labf catf catt)
 	sort layer f t
 	
-	
+
+	replace labf = "_missing" if f == 99999
+	replace labt = "_missing" if t == 99999
+
+	gen _mtag = 1 if f == 99999 | t == 99999
+
 
 	if "`shares'" != ""  {
-			bysort layer: egen _mysum = sum(`value')
-			summ _mysum, meanonly
-			replace `value' =  (`value' / `r(max)') 
+		bysort layer: egen _mysum = sum(`value')
+		summ _mysum, meanonly
+		replace `value' =  (`value' / `r(max)') 
 	}
 	
 	if "`percent'" != "" {
@@ -179,15 +170,27 @@ preserve
 		summ _mysum, meanonly
 		replace `value' =  (`value' / `r(max)') * 100
 	}
+	
+	if "`percent2'" != "" {
+		*if "`showmiss'" != "" {
+			bysort layer: egen _mysum = sum(`value')
+		*}
+		*else {
+		*	bysort layer: egen _mysum = sum(`value') if missing(_mtag)
+		*}
+		
+		summ _mysum, meanonly
+		replace `value' =  (`value' / _mysum) * 100
+	}	
 
 	if "`format'" == "" {
-		if "`shares'"!="" | "`percent'"!="" {
+		if "`shares'"!="" | "`percent'"!="" | "`percent2'"!="" {
 			local format "%4.2f"	
 		}
 		else {
 			local format "%12.0fc"	
 		}
-	}	
+	}		
 	
 
 	**** SANKEY ROUTINE BELOW
@@ -206,7 +209,8 @@ preserve
 	
 	ren labf lab1
 	ren labt lab2
-	
+
+
 	sort x1 f t  // this affects the draw order
 
 	gen id = _n
@@ -216,10 +220,10 @@ preserve
 	egen grp2 = group(x1 t)
 
 	sort x1 grp1 grp2
-	by x1: gen y1 = sum(val1) 
-
+	by x1:	gen  double y1	= sum(val1) 
+	
 	sort x2 grp2 grp1
-	by x2: gen y2 = sum(val2) 
+	by x2: 	gen  double y2	= sum(val2) 
 
 	sort x1 f t
 
@@ -227,206 +231,285 @@ preserve
 	
 	ren f flo1
 	ren t flo2
-	
-			
-	reshape long x flo val grp y cat lab, i(id layer) j(tt)
-	drop tt
-
-	ren lab _lab
-	
-	order grp id _lab x		
-	sort id x _lab
 		
+	reshape long x flo val grp y cat lab, i(id layer) j(marker)
+	*drop tt
+
+
+	ren lab var
 	
-	sort layer x y
-
-	by layer x: gen y1 = y[_n-1]
-	recode y1 (.=0)
-	gen y2 = y
-	drop y
-
-	order layer grp id _lab x y1 y2 val
-
-	// mark the highest value and the layer
-
-	levelsof x, local(lvls)
-
-	local hival = 0 // track the value
-
-	foreach x of local lvls {
-
-		summ y2 if x==`x', meanonly
-		if r(max) > `hival' {
-			local hilayer = `x'
-			local hival = r(max)
+	// variable type check
+	
+	if substr("`: type var'",1,3) != "str" {
+		if "`: value label var '" != "" { 	// has value label
+			decode var, gen(name)
 		}
+		else {								// has no value label
+			gen name = string(var)
+		}
+	}
+	else {
+		cap ren var name
+		encode name, gen(var) // alphabetical organization
+	}	
+	
+
+	**** from sankey	
+	
+	gen layer2 = layer
+	replace layer2 = layer2 + 1 if marker==2	
+	
+
+	sort layer2 var marker
+
+	if "`percent2'" != "" {
+		bysort layer2 var: egen double val_out_temp2 = sum(val) if marker==1 & missing(_mtag) // how much value is sent out
+		bysort layer2 var: egen double val_in_temp2  = sum(val) if marker==2 & missing(_mtag) // how many value comes in
+		
+		bysort layer2 var: egen double val_out2 = max(val_out_temp2)  if missing(_mtag)
+		bysort layer2 var: egen double val_in2  = max(val_in_temp2)    if missing(_mtag)
+	
+		drop *temp2
+		recode val_in2 val_out2 (.=0)
+	
+		egen double height2 = rowmax(val_in2 val_out2) if missing(_mtag)
+
+	}
+	
+	bysort layer2 var: egen double val_out_temp = sum(val) if marker==1 // how much value is sent out
+	bysort layer2 var: egen double val_in_temp  = sum(val) if marker==2 // how many value comes in
+	
+	bysort layer2 var: egen double val_out = max(val_out_temp)
+	bysort layer2 var: egen double val_in  = max(val_in_temp)
+	
+	drop *temp
+	recode val_in val_out (.=0)
+	
+	egen double height = rowmax(val_in val_out) // this is the maximum height for each category for each group.
+
+
+	// layer order
+	*labmask flo, val(name)
+	drop var 
+	ren flo var	
+		
+	gsort layer2  var id
+		
+	egen tag2 = tag(layer2 var)
+	by layer2 : gen order = sum(tag2) // take it as it is
+	cap drop tag2
+			
+	
+	// bar order
+	egen temp = tag(layer2 var)
+	gen bar_order = sum(temp)
+	drop temp
+	
+
+	
+	*****************************
+	**** generate the boxes   ***
+	*****************************
+
+	egen tag = tag(layer2 height order)
+	sort layer2 tag order
+
+	if "`percent2'" == "" {
+		by layer2: gen double heightsum = sum(height) if tag==1 
+	}
+	else {
+		by layer2: gen double heightsum = sum(height2) if tag==1 & missing(_mtag) 
+	}
+
+	// gen spike coordinates
+	bysort layer2: gen double y1 = heightsum[_n-1] if tag==1  // 
+	recode y1 (.=0)  if tag==1
+	gen double y2 = heightsum
+
+	
+	if "`percent2'" != "" {
+		bysort layer2: egen double _max = max(y2) if tag==1 
+		replace y1 = (y1 / _max) * 100
+		replace y2 = (y2 / _max) * 100
+		
+		drop _max
+	}
+	
+	*** control missing
+
+	if "`showmiss'" == "" | "`percent2'" != ""  {
+		replace y1 = . if _mtag==1
+		replace y2 = . if _mtag==1
 	}
 	
 	
-	*** add gaps
-	
-	local propgap = `hival' * `gap' / 100
-	
-	sort x layer flo id
-	egen tag = tag(x flo)
-	bysort x: replace tag = sum(tag)
-	
-	gen offset = (tag - 1) * `propgap' 
-	replace y1 = y1 + offset
-	replace y2 = y2 + offset
-	
-	drop tag offset
-	encode _lab, gen(order)
+	*** add gap
+
+	tempvar mygap
+	summ heightsum if tag==1, meanonly
+	local maxval = r(max) * `gap' / 100  
+	gen `mygap' = (order - 1) * `maxval' if tag==1 
+
+	replace y1 = y1 + `mygap'
+	replace y2 = y2 + `mygap'
+
+	cap drop heightsum
+
 	
 	
-	*** transform the groups to be at the mid points	
-
-	sort x id y1 y2
-	gen y1t = .
-	gen y2t = .
-
-
-	levelsof layer
-	local tlayers = r(r) - 1
-
-
-	forval i = 1/`tlayers' {
-		
-	local left  = `i'	
-	local right = `i' + 1
-
-		
-	levelsof flo if layer== `left', local(lleft)  // y:   to in the  first cut 
-	levelsof flo if layer==`right', local(lright) // x: from in the second cut
-
-
-	foreach y of local lleft {  // left
-		foreach x of local lright {      // right
-
-		
-			if `x' == `y' & (`x'!=99999 & `y'!=99999) {  // check if the groups are equal
-
-				// in layer range	
-				summ y1 if flo==`x' & layer==`left' & x==`left', meanonly 
-				if r(N) > 0 {
-					local y1max `r(max)'
-					local y1min `r(min)'
-				}
-				else {
-					local y1max 0
-					local y1min 0				
-				}	
-					
-				summ y2 if flo==`x' & layer==`left' & x==`left', meanonly 
-				if r(N) > 0 {
-					local y2max `r(max)'
-					local y2min `r(min)'
-				}
-				else {
-					local y2max 0
-					local y2min 0				
-				}	
-					
-				local l1max = max(`y1max',`y2max')
-				local l1min = min(`y1min',`y2min')
-				
-				// out layer range		
-				summ y1 if flo==`x' & layer==`right' & x==`left', meanonly 
-				if r(N) > 0 {	
-					local y1max `r(max)'
-					local y1min `r(min)'
-				}
-				else {
-					local y1max 0
-					local y1min 0
-				}
-
-				summ y2 if flo==`x' & layer==`right' & x==`left', meanonly 
-				if r(N) > 0 {	
-					local y2max `r(max)'
-					local y2min `r(min)'
-				}
-				else {
-					local y2max 0
-					local y2min 0
-				}	
-					
-				local l2max = max(`y1max',`y2max')
-				local l2min = min(`y1min',`y2min')				
-					
-				
-				// calculate the displacement	
-				local displace = ((`l1max' - `l1min') - (`l2max' - `l2min')) / 2
-				
 			
-				// displace the top and bottom parts
-				replace y1t = y1 + `displace' + `l1min' - `l2min' if flo==`x' & layer==`right' & x==`left' 			
-				replace y2t = y2 + `displace' + `l1min' - `l2min' if flo==`x' & layer==`right' & x==`left' 
-					
-				}
-			}
+	*************************
+	** generate the links  **
+	*************************
+
+	gen markme = .
+	
+	sort layer2 var markme marker  
+
+	// marker = 1 = outgoing
+	// marker = 2 = incoming
+
+	//////////////////////
+	///  second sort   ///
+	//////////////////////
+
+	
+	if "`stype2'"=="" | "`stype2'"=="order" {
+		if "`srev2'" == "reverse" {
+			local ssort2 -id // by order	
+		}
+		else {
+			local ssort2 id // by order	
+		}
+		 
+	}
+	if "`stype2'"=="value" {
+		if "`srev2'" == "reverse" {
+			local ssort2 -val // by value	
+		}
+		else {
+			local ssort2 val // by value	
+		}
+	}
+	
+
+	if "`showmiss'" == "" drop if _mtag == 1
+	
+	
+	gsort layer2 marker var markme `ssort2'   // this determines the second sort
+
+	by layer2 marker var: gen double stack_end   = sum(val) 		  if markme!=1
+	by layer2 marker var: gen double stack_start = stack_end[_n - 1]  if markme!=1
+	recode stack_start (.=0) if markme!=1	
+
+	
+	
+	levelsof layer2, local(lvls)
+
+	foreach x of local lvls {
+
+		// outgoing levels
+		levelsof var if layer2==`x' & marker==1, local(vars)
+		
+		foreach y of local vars {
+			summ y1 if layer2==`x' & var==`y', meanonly
+			local ymin = r(min)
+			summ y2 if layer2==`x' & var==`y', meanonly
+			local ymax = r(max)
+			
+			summ stack_end if layer2==`x' & var==`y' & marker==1, meanonly
+			local smax = r(max)
+			
+			local displace = ((`ymax' - `ymin') - `smax' ) / 2
+		
+			replace stack_start = stack_start + `ymin' + `displace' if layer2==`x' & marker==1 & var==`y'
+			replace stack_end   = stack_end   + `ymin' + `displace' if layer2==`x' & marker==1 & var==`y'
+			
+		}
+		
+		// incoming levels
+		levelsof var if layer2==`x' & marker==2, local(vars)
+		
+		foreach y of local vars {
+			summ y1 if layer2==`x' & var==`y', meanonly
+			local ymin = r(min)
+			summ y2 if layer2==`x' & var==`y', meanonly
+			local ymax = r(max)
+			
+			summ stack_end if layer2==`x' & var==`y' & marker==2 , meanonly
+			local smax = r(max)
+			
+			local displace = ((`ymax' - `ymin') - `smax' ) / 2
+			
+			replace stack_start = stack_start + `ymin' + `displace' if layer2==`x' & marker==2 & var==`y'
+			replace stack_end   = stack_end   + `ymin' + `displace' if layer2==`x' & marker==2 & var==`y'
+			
 		}	
 	}
-
-
-	replace y1t = y1 if missing(y1t)
-	replace y2t = y2 if missing(y2t)
-
-	drop y1 y2
-
-	ren y1t y1	
-	ren y2t y2
 	
 	
-	*** recenter
+	gen stack_x = layer2
+	sort layer2 markme id
+	
+	
+	// mark the highest value and the layer
 
-	levelsof x, local(lvls)		
+	summ y2, meanonly
+	local hival = r(max)
+	
+	// recenter
+	
+	*** recenter to middle
 
+	levelsof layer2, local(lvls)		
+			
 	foreach x of local lvls {
 		
-		qui summ y1 if x==`x', meanonly
+		qui summ y1 if layer2==`x', meanonly
 		local ymin = r(min)
-		qui summ y2 if x==`x', meanonly
+		qui summ y2 if layer2==`x', meanonly
 		local ymax = r(max)
 		
-		
-		if "`recenter'" == "bot" {
-			local displace = 0
+		if "`recenter'" == "bottom" | "`recenter'" == "bot"  | "`recenter'" == "b" { 		
+			local displace = cond(`ymin' < 0, `ymin' * -1, 0)
 		}
-		
-		
-		if "`recenter'" == "" | "`recenter'" == "mid" {
+			
+		if "`recenter'" == "" | "`recenter'" == "middle" | "`recenter'" == "mid"  | "`recenter'" == "m" { 
 			local displace = (`hival' - `ymax') / 2
 		}
-		
-		if "`recenter'" == "top" {
+			
+		if "`recenter'" == "top" | "`recenter'" == "t"  {
 			local displace = `hival' - `ymax'
 		}		
-				
-		replace y1 = y1 + `displace' if x==`x'
-		replace y2 = y2 + `displace' if x==`x'
 		
+		replace y1 = y1 + `displace' if layer2==`x'
+		replace y2 = y2 + `displace' if layer2==`x'
+		
+		replace stack_end   = stack_end   + `displace' if layer2==`x'
+		replace stack_start = stack_start + `displace' if layer2==`x'		
 	}
 	
-	cap drop sums
-	bysort layer x _lab: egen sums = sum(val)
-		
 
 	*** generate the curves	
+	
+
 	local newobs = `n'	
 	expand `newobs'
-	sort id x
-	cap drop xtemp
-	bysort id: gen xtemp =  (_n / (`newobs' * 2))
+	sort id layer2
+	
+	tempvar xtemp ytemp
 
+	bysort id: gen double `xtemp' =  (_n / (`newobs' * 2))
+
+	
 	if "`smooth'" == "" local smooth = 4
 	
-	gen ytemp =  (1 / (1 + (xtemp / (1 - xtemp))^-`smooth'))
+	gen double `ytemp' =  (1 / (1 + (`xtemp' / (1 - `xtemp'))^-`smooth'))
 
-	gen y1temp = .
-	gen y2temp = .
+	gen archi = .
+	gen arclo = .
 
-
+	
 	levelsof layer	, local(cuts)
 	levelsof id		, local(lvls)
 
@@ -434,420 +517,342 @@ preserve
 
 		foreach y of local cuts {
 
-			summ ytemp if id==`x' & layer==`y', meanonly
+			summ `ytemp' if id==`x' & layer==`y'
+		
 			
-			if r(N) > 0 {
-				local ymin = r(min)
-				local ymax = r(max)
-			}	
-			else {
-				local ymin = 0
-				local ymax = 0
-			}
-
-			sum x if layer==`y', meanonly
+			// x-coordinates
+			local ymin = cond(r(N) > 0, r(min), 0)
+			local ymax = cond(r(N) > 0, r(max), 0)
+			
+			summ layer2 if layer==`y', meanonly
 				local x0 = r(min)
 				local x1 = r(max)
 
 			
-			summ y1 if id==`x' & x==`x0' & layer==`y', meanonly
-			if r(N) > 0 {
-				local y1min = r(min)
-			}
-			else {
-				local y1min = 0
-			}
-				
-			summ y1 if id==`x' & x==`x1' & layer==`y', meanonly
-			if r(N) > 0 {
-				local y1max = r(max)
-			}
-			else {
-				local y1max = 0	
-			}
+			// left y values
+			summ stack_start if id==`x' & layer2==`x0' & layer==`y', meanonly
+			local y1min = cond(r(N) > 0, r(min), 0)
+							
+			summ stack_start if id==`x' & layer2==`x1' & layer==`y', meanonly
+			local y1max = cond(r(N) > 0, r(max), 0)			
 			
-			replace y1temp = (`y1max' - `y1min') * (ytemp - `ymin') / (`ymax' - `ymin') + `y1min' if id==`x' & layer==`y'
 			
-			summ y2 if id==`x' & x==`x0' & layer==`y', meanonly
-			if r(N) > 0 {
-				local y2min = r(min)
-			}
-			else {
-				local y2min = 0
-			}	
+			replace archi = (`y1max' - `y1min') * (`ytemp' - `ymin') / (`ymax' - `ymin') + `y1min' if id==`x' & layer==`y'
 			
-			summ y2 if id==`x' & x==`x1' & layer==`y', meanonly
-			if r(N) > 0 {
-				local y2max = r(max)
-			}
-			else {
-				local y2max = 0.0000001	
-			}
-					
-			replace y2temp = (`y2max' - `y2min') * (ytemp - `ymin') / (`ymax' - `ymin') + `y2min' if id==`x' & layer==`y'
+			
+			// right y values
+			summ stack_end if id==`x' & layer2==`x0' & layer==`y', meanonly
+			local y2min = cond(r(N) > 0, r(min), 0)
+			
+			summ stack_end if id==`x' & layer2==`x1' & layer==`y', meanonly
+			local y2max = cond(r(N) > 0, r(max), 0)	
+			
+			replace arclo = (`y2max' - `y2min') * (`ytemp' - `ymin') / (`ymax' - `ymin') + `y2min' if id==`x' & layer==`y'
+			
 		}
 	}
 
+	gen arcx = `xtemp' + layer
 
-
-	replace xtemp = xtemp + layer - 1
 
 		
 	***** mid points for wedges
-			 
-			 
-	egen tag = tag(x flo)
-			 
-	cap gen midy = .
-
-	levelsof x, local(lvls)
-	foreach x of local lvls {
-
-	levelsof flo if x ==`x', local(odrs)
-
-		foreach y of local odrs {
-		
-		summ y1 if x==`x' & flo==`y', meanonly
-		local min = r(min)
-		
-		summ y2 if x==`x' & flo==`y', meanonly
-		local max = r(max)
-		
-		replace midy = (`min' + `max') / 2 if tag==1 & x==`x' & flo==`y'
-		
-		}
-	}
-
-
-	***** mid points for labels
-
-	egen tagp = tag(id)
-
-	gen midpout   = .  // outgoing
-	gen xout   	  = .  
-	gen valout	  = ""
-	
-	gen midpin   = .  // incoming
-	gen xin      = .
-	gen valin	  = ""
-	
-
-	levelsof id, local(lvls)
-	foreach x of local lvls {
-
-	// outbound values
-		summ x if id==`x', meanonly
-		local xval = r(min)
-		
-		summ y1 if id==`x' & x==`xval', meanonly
-		local min = r(min)
-		
-		summ y2 if id==`x'  & x==`xval', meanonly
-		local max = r(max)
-		
-		replace midpout = (`min' + `max') / 2 if id==`x' & tagp==1
-		replace xout = x if id==`x' & tagp==1	
-		
-		
-		if "`percent'" != "" {
-			replace valout = string(val, "`format'") + "%" if id==`x' & tagp==1
-		}
-		else {
-			replace valout = string(val, "`format'") if id==`x' & tagp==1
-		}
-		
-		*replace valout = val if id==`x' & tagp==1	
-		
-	// inbound values
-		summ x if id==`x', meanonly
-		local xval = r(max)
-		
-		summ y1 if id==`x' & x==`xval', meanonly
-		local min = r(min)
-		
-		summ y2 if id==`x'  & x==`xval', meanonly
-		local max = r(max)
-		
-		replace midpin = (`min' + `max') / 2 if id==`x' & tagp==1		
-		replace xin = x + 1 if id==`x' & tagp==1	
-		
-		if "`percent'" != "" {
-			replace valin = string(val, "`format'") + "%" if id==`x' & tagp==1
-		}
-		else {
-			replace valin = string(val, "`format'") if id==`x' & tagp==1
-		}		
-	}
-
-	*** fix boxes
-						
-	sort layer grp x y1 y2
-	bysort x order: egen ymin = min(y1)
-	bysort x order: egen ymax = max(y2)
-			 
-	egen wedge = group(x flo)		 
-	egen tagw = tag(wedge)		
-	
-	replace _lab = "missing" if flo== 99999
-	
-	*** tag the category labels
-	
-	summ ymin, meanonly
-		local catmin = r(min)
-	summ ymax, meanonly
-		local catmax = r(max)
-	
-	egen tagc = tag(cat)
-	if "`catgap'"		== "" local catgap 3
-	
-	gen grpy = `catmin' - ((`catmax' - `catmin') * `catgap' / 100) if tagc==1
-	
-	gen grpnm = ""
-	
-	foreach x of local varlist {
-		replace grpnm = "`mylab`x''" if cat=="`x'" & tagc==1		
-	}
+	egen tag_spike = tag(layer2 var tag)
+	gen double ymid = (y1 + y2) / 2 if tag_spike==1
 	
 	
-	local catlab grpnm
+	***** mid points for sankey labels
+	egen tag_id = tag(id marker)
+	gen double arcmid = (stack_end + stack_start) / 2 if tag_id==1
 	
-	if "`wrapcat'" != "" {
-		labsplit grpnm, wrap(`wrapcat') gen(grplab)
-		local catlab grplab
-	}		
+	egen layer_id = group(layer2) // layer id for coloring
+
+
+	// wrappers
+
 	
-	
-	sort x flo 
-	
-	if "`boxwidth'"    == "" local boxwidth 3.2
-	
-
-	********************
-	*** final plot   ***
-	********************
-
-		if "`palette'" == "" {
-			local palette tableau
-		}
-		else {
-			tokenize "`palette'", p(",")
-			local palette  `1'
-			local poptions `3'
-		}
-
-		
-		if "`colorby'" == "layer" | "`colorby'" == "level" {
-			local switch 1
-		}
-		else {
-			local switch 0
-		}
-		
-
-	sort layer x order xtemp y1temp y2temp
-
-
-	// boxes
-
-	local boxes
-
-	levelsof wedge, local(lvls)
-	local items = r(r)
-
-
-	foreach x of local lvls {
-
-
-		if `switch' == 1 { // by layer
-			summ x if wedge==`x', meanonly
-			local clr = r(mean) + 1
-		}
-		else {  			// by category
-			summ order if wedge==`x', meanonly
-			local clr = r(mean) 
-		}
-
-		colorpalette `palette' , nograph `poptions'
-		local boxes `boxes' (rspike ymin ymax x if wedge==`x' & tagw==1, lcolor("`r(p`clr')'%100") lw(`boxwidth')) 
-		
-	}
-
-	// arcs
-	
-	if "`lcolor'"  == "" local lcolor white
-	if "`lwidth'"  == "" local lwidth none
-
-	levelsof wedge
-	local groups = r(r)
-		
-	local shapes	
-
-		
-	levelsof id, local(lvls)
-
-	foreach x of local lvls {
-		
-		if `switch' == 1 { 	// by layer
-			qui sum layer if id==`x'
-		}
-		else {  			// by category
-			qui sum x if id==`x'
-			qui sum order if id==`x' & x == r(min)
-		}
-
-		
-
-		if r(N) > 0 {
-			local clr = r(mean)
-			colorpalette `palette' , nograph `poptions'
-			local shapes `shapes' (rarea y1temp y2temp xtemp if id==`x', lc(`lcolor') lw(`lwidth') fi(100) fcolor("`r(p`clr')'%`alpha'"))  
-		}
-	}	
-			
-			
-	**** PLOT EVERYTHING ***
 	
 
 	
+	// define all the locals before drawing
+	
+	if "`lcolor'"       == "" local lcolor black
+	if "`labcolor'"     == "" local labcolor black
+	if "`lwidth'"       == "" local lwidth 0.02	
+	if "`colorvarmiss'" == "" local colorvarmiss gs12
 	if "`labangle'" 	== "" local labangle 90
-	if "`labsize'" 		== "" local labsize 2	
+	if "`labsize'"  	== "" local labsize 2	
 	if "`labposition'"  == "" local labposition 0	
 	if "`labgap'" 		== "" local labgap 0
-	if "`labcolor'" 	== "" local labcolor black
+	if "`valsize'"  	== "" local valsize 1.5
+	if "`valgap'" 	 	== "" local valgap 2
+	if "`boxwidth'"    	== "" local boxwidth 3.2
+	if "`colorboxmiss'" == "" local colorboxmiss gs10
+	
+	if "`format'" 		== "" {
+		if "`percent'" != "" | "`percent2'" != "" {
+			local format "%5.2f"
+		}
+		else {
+			local format "%12.0f"
+		}
+	}
+	
+	format val `format'	
+	
+	
+	if "`colorby'" == "layer" | "`colorby'" == "level" {
+		local switch 1
+	}
+	if "`colorby'"  == "" local switch 0		
+	if "`colorvar'" != "" local switch 2	
+	
+	if "`palette'" == "" {
+		local palette tableau
+	}
+	else {
+		tokenize "`palette'", p(",")
+		local palette  `1'
+		local poptions `3'
+	}	
+	
+	
+	
+	// draw bars
+	
+	
+	encode name, gen(name2)
+	
+	local bars
+	
+	if `switch'==0 {
+		levelsof name2, local(lvls)
+		local items = r(r)
+		
+		colorpalette `palette' , n(`items') nograph `poptions'
+		foreach x of local lvls {			
+			local bars `bars' (rspike y2 y1 layer2 if name2==`x' & tag==1 & tag_spike==1, lw(`boxwidth')  lc("`r(p`x')'")) 
+		}	
+	}
+	
+	if `switch'==1 {
+		levelsof layer_id, local(lvls)
+		local items = r(r)
+		
+		colorpalette `palette' , n(`items') nograph `poptions'
+		foreach x of local lvls {	
+			local bars `bars' (rspike y2 y1 layer2 if layer_id==`x' & tag==1 & tag_spike==1, lw(`boxwidth')  lc("`r(p`x')'")) 
+		}
+	}
+	
+	if `switch'==2 {
+
+		levelsof clrlvl
+		local items = r(r)
+		
+		levelsof bar_order, local(lvls)
+		foreach x of local lvls {			
+			
+			summ clrlvl if bar_order==`x' , meanonly
+			
+			if r(max) > 0 {
+				local clr = r(max)
+				colorpalette `palette' , n(`items') nograph `poptions'
+				local myclr  `r(p`clr')'
+			}
+			else {
+				local myclr  `colorboxmiss'
+			}
+			
+			local bars `bars' (rspike y2 y1 layer2 if bar_order==`x' & tag==1 & tag_spike==1, lw(`boxwidth')  lc("`myclr'")) 
+		}			
+			
+	}
+
+	
+	// draw arcs
+	
+	local shapes
+	
+	levelsof id if markme!=1, local(lvls)
+
+	foreach x of local lvls {
+		
+		if `switch'==0 {
+			summ name2 if id==`x' & marker==1, meanonly
+		}
+		if `switch'==1 {
+			summ layer_id if id==`x' & marker==1, meanonly
+		}
+		if `switch'==2 {		 	// by layer
+			sum clrlvl if id==`x' & tag_id==1, meanonly
+		}		
+		
+		
+		if r(N) > 0 {
+			local clr = r(mean)
+			
+			if `clr' > 0 {
+				colorpalette `palette' , n(`items') nograph `poptions'
+				local myclr  `r(p`clr')'
+			}
+			else {
+				local myclr  `colorvarmiss'
+			}
+		
+		
+			local shapes `shapes' (rarea archi arclo arcx if id==`x', lc(`lcolor') lw(`lwidth') fi(100) fcolor("`myclr'%`alpha'") ) 
+		}
+	}
+	
+		
+	
+	**** box labels
+	
+	if "`nolabels'" == "" {
+		if "`showtotal'" != "" {
+			if "`percent'" != "" | "`percent2'" !="" {
+				gen lab2 = name + " (" + string(height, "`format'") + "%)" if tag_spike==1
+			}
+			else {
+				gen lab2 = name + " (" + string(height, "`format'") + ")" if tag_spike==1
+			}
+		}
+		else {
+			gen lab2 = name if tag_spike==1
+		}
+		
+
+		if "`wraplabel'" != "" {
+			ren lab2 lab2_temp
+			labsplit lab2_temp, wrap(`wraplabel') gen(lab2)
+			drop lab2_temp
+			
+			replace lab2 = subinstr(lab2, "_missing", "{it:missing}", .)
+			
+		}			
+		
+		if "`labprop'" != "" {
+			summ height if tag_spike==1, meanonly
+			gen labwgt = `labsize' * (height / r(max))^`labscale' if tag_spike==1
+			
+			tempvar _lablyr
+			egen `_lablyr' = group(id layer2) if tag_spike==1  // to prevent duplicates names
+			
+			levelsof `_lablyr', local(lvls)
+			
+			foreach x of local lvls {
+				summ labwgt if `_lablyr'==`x' & tag_spike==1 & ymid!=., meanonly
+				local labw = r(max)
+				
+				local boxlabel `boxlabel' (scatter ymid layer2 if tag_spike==1 & `_lablyr'==`x' & height > `valcondition',  msymbol(none) mlabel(lab2) mlabsize(`labw') mlabpos(`labposition') mlabgap(`labgap') mlabangle(`labangle') mlabcolor(`labcolor')) 
+			}
+		}
+		else {
+			local boxlabel (scatter ymid layer2 if tag_spike==1  & height > `valcondition',  msymbol(none) mlabel(lab2) mlabsize(`labsize') mlabpos(`labposition') mlabgap(`labgap') mlabangle(`labangle') mlabcolor(`labcolor')) 
+		}	
+	}	
+
+	
+	local flowval val
+	
+	if "`percent'" != "" {
+		gen valper = string(val, "`format'") + "%" if (marker==1 | marker==2)
+		local flowval valper
+	}
+	
+
+	**** arc labels
+	
+	if "`valprop'" != "" {
+		summ val if tag==1, meanonly
+		gen valwgt = `valsize' * (val / r(max))^`valscale' if tag_id==1
+	}
+	else {
+		gen valwgt = 1 if tag_id==1
+	}	
+	
+	if "`novalues'" == "" {
+		if "`valprop'" == "" {
+			
+			if  "`novalleft'" == "" {
+				local values `values' (scatter arcmid layer2  if val >= `valcondition' & marker==1, msymbol(none) mlabel(`flowval') mlabsize(`valsize') mlabpos(3) mlabgap(`valgap') mlabcolor(`labcolor')) 
+			}
+			
+			if  "`novalright'" == "" {
+				local values `values' (scatter arcmid layer2  if val >= `valcondition' & marker==2, msymbol(none) mlabel(`flowval') mlabsize(`valsize') mlabpos(9) mlabgap(`valgap') mlabcolor(`labcolor')) 
+			}
+		}
+		else {
+			
+			levelsof id, local(lvls)
+			
+			foreach x of local lvls {
+				summ valwgt if id==`x', meanonly
+				local valw = r(mean)
+			
+				if  "`novalleft'" == "" {
+					local values `values' (scatter arcmid layer2 if val >= `valcondition' & id==`x' & marker==1, msymbol(none) mlabel(val) mlabsize(`valw') mlabpos(3) mlabgap(`valgap') mlabcolor(`labcolor')) 
+				}
+			
+				if  "`novalright'" == "" {
+					local values `values' (scatter arcmid layer2 if val >= `valcondition' & id==`x' & marker==2, msymbol(none) mlabel(val) mlabsize(`valw') mlabpos(9) mlabgap(`valgap') mlabcolor(`labcolor')) 
+				}
+			}
+		}		
+	}
+	
+	
+	**** level titles
 	
 	if "`catsize'"		== "" local catsize 2.3	
 	if "`catposition'"	== "" local catposition 0
 	if "`catcolor'"		== "" local catcolor black
-	if "`catangle'"		== "" local catangle 0	
+	if "`catangle'"		== "" local catangle 0		
+	
+	summ stack_end, meanonly
+	local _ctgap = `r(max)' * `catgap' / 100
+	
+		
+	gen _ctlab = ""
+	gen _cty   = 0 - `_ctgap' in 1/`varcount'
+	gen _ctx   = . 
+	
+	local i = 1
+	
+	foreach x of local varlist {
+		replace _ctlab =  "`mylab`x''" in `i'
+		replace _ctx = `i'  in `i'
+		
+		local ++i
+	}
 	
 	
-	if "`valsize'"  == "" local valsize 1.5
-
-	local labcon "if val >= `valcondition'"
-
-	
-
-	
-	
-	format val `format'
-	
-	
-	if "`valgap'" 	 == "" local valgap 2	
-	
-	summ ymax, meanonly
-	local yrange = r(max)
-	
-	if "`showtotal'" != "" {
-		if "`percent'" != "" {
-			replace _lab = _lab + " (" + string(sums, "`format'") + "%)" if tag==1
-		}
-		else {
-			replace _lab = _lab + " (" + string(sums, "`format'") + ")" if tag==1
-		}
-	}	
-	
-
-	local labval _lab
-	
-	if "`wraplabel'" != "" {
-		labsplit _lab, wrap(`wraplabel') gen(_lab2)
-		local labval _lab2
+	if "`wrapcat'" != "" {
+		ren _ctlab _ctlab2
+		labsplit _ctlab2, wrap(`wrapcat') gen(_ctlab)
 	}		
-
-	
-	// add italics to missing
-	
-	replace `labval' = subinstr(`labval', "missing", "{it:missing}", .)
 	
 	
-	if "`labprop'" != "" {
-	
-		summ sums if tag==1, meanonly
-		gen double _labwgt = `labsize' * (sums / r(max))^`labscale' if tag==1
-			
-		levelsof _lab, local(lvls)
-			
-		foreach x of local lvls {
-			summ _labwgt if _lab=="`x'" & tag==1, meanonly
-			local labw = r(max)
-				
-			local labels `labels' (scatter midy x if _lab=="`x'" & tag==1, msymbol(none) mlabel(`labval') mlabgap(`labgap') mlabsize(`labw') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
-			
-		}
-	
-	}
-	else {
-		local labels (scatter midy x if  tag==1, msymbol(none) mlabel(`labval') mlabgap(`labgap') mlabsize(`labsize') mlabpos(`labposition') mlabcolor(`labcolor') mlabangle(`labangle'))
-	}
-	
-	// arc values 
-	
-	if "`valprop'" != "" {
-		summ val if tagp==1, meanonly
-		gen _valwgt = `valsize' * (val / r(max))^`valscale'
-	}
-	
-	
-	if "`novalues'" == "" {
-		if "`novalleft'" == "" {
-			if "`valprop'" != "" {
-				levelsof id if !missing(xout) & tagp==1, local(lvls)
-				
-				foreach x of local lvls {
-					summ _valwgt if id==`x' & tagp==1, meanonly
-					local valw = r(mean)	
-				
-					local valuesL `valuesL' (scatter midpout xout `labcon' & id==`x' & tagp==1, msymbol(none) mlabel(valout) mlabsize(`valw') mlabpos(3) mlabgap(`valgap') mlabcolor(`labcolor')) 
-				}
-			
-			}
-			else {
-				local valuesL `valuesL' (scatter midpout xout `labcon', msymbol(none) mlabel(valout) mlabsize(`valsize') mlabpos(3) mlabgap(`valgap') mlabcolor(`labcolor')) 
-			}	
-		}
-		
-		if "`novalright'" == "" {
-			if "`valprop'" != "" {
-				levelsof id if !missing(xin) & tagp==1, local(lvls)
-				
-				foreach x of local lvls {
-					summ _valwgt if id==`x' & tagp==1, meanonly
-					local valw = r(mean)	
-				
-					local valuesR `valuesR' (scatter midpin xin `labcon' & id==`x' & tagp==1, msymbol(none) mlabel(valin) mlabsize(`valw') mlabpos(9) mlabgap(`valgap') mlabcolor(`labcolor')) 
-				}
-			
-			}
-			else {
-				local valuesR `valuesR' (scatter midpin xin `labcon', msymbol(none) mlabel(valin) mlabsize(`valsize') mlabpos(9) mlabgap(`valgap') mlabcolor(`labcolor')) 
-			}
-		}
-	}	
-	
-	
-
-	// offset
-	
-	summ x, meanonly
+	// offset	
+	summ layer2, meanonly
 	local xrmin = r(min)
-	local xrmax = r(max) + ((r(max) - r(min)) * `offset' / 100) 
+	local xrmax = r(max) + ((r(max) - r(min)) * `offset' / 100)
+
+	**** PLOT EVERYTHING ***
 	
-		
-	// FINAL PLOT //
-	
-	
-	twoway ///
-		`shapes' ///
-			`boxes' ///
-			`labels' ///
-			`valuesL' ///
-			`valuesR' ///
-			(scatter grpy x if tagc==1, msymbol(none) mlabel(`catlab') mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
-			, ///
-				legend(off) ///
-					xlabel(, nogrid) ylabel(0 `yrange', nogrid)     ///
+	twoway 			///
+		`shapes' 	///
+		`bars' 		///
+		`boxlabel' 	///
+		`values'  	///
+		(scatter _cty _ctx , msymbol(none) mlabel(_ctlab) mlabsize(`catsize') mlabpos(`catposition') mlabcolor(`catcolor') mlabangle(`catangle')) ///
+			, 		///
+				legend(off) 										 ///
+					xlabel(, nogrid) ylabel(0 `yrange' , nogrid)     ///
 					xscale(off range(`xrmin' `xrmax')) yscale(off)	 ///
 					`options'
+		
 */
 
 restore
@@ -862,5 +867,6 @@ end
 *********************************
 ******** END OF PROGRAM *********
 *********************************
+
 
 

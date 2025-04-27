@@ -3,6 +3,6 @@ authors:
 - family-names: "Naqvi"
   given-names: "Asjad"
 title: "Stata package ``alluvial''"
-version: 1.42
-date-released: 2025-03-06
+version: 1.5
+date-released: 2025-04-27
 url: "https://github.com/asjadnaqvi/stata-alluvial"

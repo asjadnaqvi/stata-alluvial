@@ -1,7 +1,7 @@
 {smcl}
-{* 06Mar2025}{...}
+{* 27Apr2025}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.42 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.5 (GitHub)}}
 
 {hline}
 
@@ -12,7 +12,7 @@
 {p 8 15 2}
 
 {cmd:alluvial} {it:varlist} {ifin} {weight}, 
-                {cmd:[} {cmd:value}({it:numvar}) {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) {cmdab:shares} {cmdab:percent}
+                {cmd:[} {cmd:value}({it:numvar}) {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) {cmdab:share:s} {cmdab:percent} {cmdab:percent2}
                   {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labc:olor}({it:str}) {cmdab:labg:ap}({it:str}) 
                   {cmdab:cata:ngle}({it:str}) {cmdab:cats:ize}({it:str}) {cmdab:catpos:ition}({it:str}) {cmdab:catc:olor}({it:str}) {cmdab:catg:ap}({it:str}) 
                   {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmd:format}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues} {cmdab:showtot:al} {cmdab:novall:eft} {cmdab:novalr:ight} 
@@ -76,11 +76,12 @@ Default value is {opt alpha(75)} for 75% transparency.{p_end}
 
 {p2coldent : {opt catc:olor(str)}}The color of the category labels. Default is {opt catc(black)}.{p_end}
 
-{p2coldent : {opt catg:ap(str)}}The gap of the category labels from the base of the alluvial. Default is {opt catg(0)}.{p_end}
+{p2coldent : {opt catg:ap(str)}}The gap of the category labels from the base of the alluvial as a percentage of the total height.
+Default is {opt catg(4)} for 4%.{p_end}
 
-{p2coldent : {opt wraplab:el(num)}}Wrap the box labels after {it:num} characters.{p_end}
+{p2coldent : {opt wraplab:el(num)}}Wrap the box labels after {it:num} characters. Default is no wrapping.{p_end}
 
-{p2coldent : {opt wrapcat(num)}}Wrap the category labels after {it:num} characters.{p_end}
+{p2coldent : {opt wrapcat(num)}}Wrap the category labels after {it:num} characters. Default is no wrapping.{p_end}
 
 {p2coldent : {opt offset(num)}}The value, in percentage of x-axis width, to extend the x-axis on the right-hand side. Default is {opt offset(0)}.
 This option is highly useful if labels are rotated horizontally, and for example, positioned at 3 o'clock.{p_end}
@@ -99,7 +100,7 @@ If the label angle is change to horitzontal or the label position is changed fro
 {p2coldent : {opt vals:ize(str)}}The size of the displayed values. Default is {opt vals(1.5)}.{p_end}
 
 {p2coldent : {opt valcond:ition(num)}}The condition for showing value labels. For example, if we only want to display categories with a greater than a value of 100, 
-we can specify {opt valcond(100)}. If the {opt share} or {opt percent} are used, then please specify the thresholds accordingly (out of 1 or 100 respectively).{p_end}
+we can specify {opt valcond(100)}. If the {opt share} or {opt percent} are used, then please adjust the thresholds accordingly (out of 1 or 100 respectively).{p_end}
 
 {p2coldent : {opt format(str)}}The format of the displayed values. Defaults are {opt format(%12.0f)} and {opt format(%4.2f)} for percentages.{p_end}
 
@@ -134,8 +135,8 @@ See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.42
-This release : 06 Mar 2025
+Version      : {bf:alluvial} v1.5
+This release : 27 Apr 2025
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial
@@ -143,7 +144,8 @@ License      : {browse "https://opensource.org/licenses/MIT":MIT}
 
 Author       : {browse "https://github.com/asjadnaqvi":Asjad Naqvi}
 E-mail       : asjadnaqvi@gmail.com
-Twitter/X    : {browse "https://x.com/AsjadNaqvi":@AsjadNaqvi}
+Twitter/X    : {browse "https://twitter.com/AsjadNaqvi":@AsjadNaqvi}
+BlueSky      : {browse "https://bsky.app/profile/asjadnaqvi.bsky.social":@asjadnaqvi.bsky.social}
 
 
 
@@ -168,8 +170,9 @@ Please note that the GitHub version might be newer than the SSC version.
 {title:Other visualization packages}
 
 {psee}
-    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions}, {helpb geoboundary}, {helpb geoflow}, {helpb joyplot}, 
-	{helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, {helpb sunburst}, {helpb ternary}, {helpb tidytuesday}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
+    {helpb arcplot}, {helpb alluvial}, {helpb bimap}, {helpb bumparea}, {helpb bumpline}, {helpb circlebar}, {helpb circlepack}, {helpb clipgeo}, {helpb delaunay}, {helpb graphfunctions},
+	{helpb geoboundary}, {helpb geoflow}, {helpb joyplot}, {helpb marimekko}, {helpb polarspike}, {helpb sankey}, {helpb schemepack}, {helpb spider}, {helpb splinefit}, {helpb streamplot}, 
+	{helpb sunburst}, {helpb ternary}, {helpb tidytuesday}, {helpb treecluster}, {helpb treemap}, {helpb trimap}, {helpb waffle}
 
 Visit {browse "https://github.com/asjadnaqvi":GitHub} for further information.	
 
