@@ -185,9 +185,6 @@ preserve
 		gen double _pct2 = (`value' / _mysum2) * 100
 		replace    `value' = (`value' / _mysum) * 100
 
-	}
-	
-
 
 	if "`format'" == "" {
 		if "`shares'"!="" | "`percent'"!="" | "`percent2'"!="" {
@@ -211,7 +208,7 @@ preserve
 	ren `value' val1
 	gen val2 = val1
 	
-	
+
 	if "`percent2'" != "" {
 		gen double _pct1 = _pct2
 		
@@ -219,7 +216,6 @@ preserve
 	
 	}
 
-	
 	ren catf cat1
 	ren catt cat2
 	
@@ -251,7 +247,7 @@ preserve
 	reshape long x flo val `pctlist' grp y cat lab, i(id layer) j(marker)
 	*drop tt
 
-
+	
 	ren lab var
 	
 	// variable type check
@@ -310,8 +306,6 @@ preserve
 	egen double height = rowmax(val_in val_out) // this is the maximum height for each category for each group.
 
 	drop val_in* val_out*
-	
-
 
 	// layer order
 	*labmask flo, val(name)
@@ -755,6 +749,7 @@ preserve
 			}
 			else if "`percent2'" != "" { 
 				gen lab2 = name + " (" + string(height3, "`format'") + "%)" if tag_spike==1
+
 			}
 			else {
 				gen lab2 = name + " (" + string(height, "`format'") + ")" if tag_spike==1

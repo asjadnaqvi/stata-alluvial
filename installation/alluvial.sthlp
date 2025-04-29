@@ -35,11 +35,13 @@ They still needed to be fully tested.{p_end}
 each layer a unique color. The {it:level} option will give each category a unique color, even if they exist across multiple layers. 
 The default value is {opt colorby(level)}.{p_end}
 
+{p2coldent : {opt showmiss}}Add a missing values category on the graph. The shares of existing categories plus the missing category for each layer add up to one.{p_end}
+
 {p2coldent : {opt shares}}Convert column values into shares. Weighted if {opt weights} are specified.{p_end}
 
 {p2coldent : {opt percent}}Convert column values into percentages. Weighted if {opt weights} are specified.{p_end}
 
-{p2coldent : {opt showmiss}}Add a missing values category on the graph. The shares of existing categories plus the missing category for each layer add up to one.{p_end}
+{p2coldent : {opt percent2}}Convert column values into percentages after dropping missing categories and rescales the bar heights. Cannot be combined with {it:showmiss}.{p_end}
 
 {p2coldent : {opt smooth(num)}}This option allows users to smooth out the spider plots connections. It can take on values between [1,8], where 1 is for straight lines, and 8 is stepwise.
 The middle range between 3-6 gives more curvy links. The default value is {opt smooth(4)}.{p_end}
