@@ -61,17 +61,21 @@ preserve
 		levelsof `x'
 
 		if `r(r)' > 20 {
-			di as error "Variable {it:`x'} has more than 20 categories. The variable might be continuous."
-			di as error "Reduce the categories or drop the variable."
+			di as error "Variable {it:`x'} has more than 20 categories. Either reduce the categories or drop the variable."
 			exit
 		}		
 	}
 
 	
 	if "`novalleft'" != "" & "`novalright'" != "" {
-		display as error "Both {it:novalleft} and {it:novalright} are not allowed. If you want to hide values use the {it:novalues} option instead."
+		display as error "Both {it:novalleft} and {it:novalright} are not allowed. If you want to hide all values use the {it:novalues} option instead."
 		exit 198
 	}	
+	
+	if "`showmiss'" != "" & "`percent2'" != "" {
+		display as error "Both {it:showmiss} & {it:percent2} are not allowed."
+		exit 198
+	}
 	
 
 	// store labels for later passthru
@@ -128,7 +132,6 @@ preserve
 	gen id = _n
 	order id
 
-	
 	reshape long f t labf labt catf catt, i(id) j(layer)
 	
 	
@@ -149,9 +152,12 @@ preserve
 	if "`weight'" != "" local myweight  [`weight' = `exp']
 	
 
+
 	collapse (sum) `value' `myweight', by(f t layer labt labf catf catt)
 	sort layer f t
+
 	
+	gen double _raw = `value'
 
 	replace labf = "_missing" if f == 99999
 	replace labt = "_missing" if t == 99999
@@ -160,28 +166,28 @@ preserve
 
 
 	if "`shares'" != ""  {
-		bysort layer: egen _mysum = sum(`value')
+		bysort layer: egen double _mysum = sum(`value')
 		summ _mysum, meanonly
 		replace `value' =  (`value' / `r(max)') 
 	}
 	
 	if "`percent'" != "" {
-		bysort layer: egen _mysum = sum(`value')
+		bysort layer: egen double _mysum = sum(`value')
 		summ _mysum, meanonly
 		replace `value' =  (`value' / `r(max)') * 100
 	}
 	
+	
 	if "`percent2'" != "" {
-		*if "`showmiss'" != "" {
-			bysort layer: egen _mysum = sum(`value')
-		*}
-		*else {
-		*	bysort layer: egen _mysum = sum(`value') if missing(_mtag)
-		*}
+		bysort layer: egen double _mysum  = sum(`value') 
+		bysort layer: egen double _mysum2 = sum(`value') if missing(_mtag) // for labels only
 		
-		summ _mysum, meanonly
-		replace `value' =  (`value' / _mysum) * 100
-	}	
+		gen double _pct2 = (`value' / _mysum2) * 100
+		replace    `value' = (`value' / _mysum) * 100
+
+	}
+	
+
 
 	if "`format'" == "" {
 		if "`shares'"!="" | "`percent'"!="" | "`percent2'"!="" {
@@ -193,6 +199,7 @@ preserve
 	}		
 	
 
+
 	**** SANKEY ROUTINE BELOW
 
 	ren layer x1
@@ -203,6 +210,15 @@ preserve
 	
 	ren `value' val1
 	gen val2 = val1
+	
+	
+	if "`percent2'" != "" {
+		gen double _pct1 = _pct2
+		
+		local pctlist _pct
+	
+	}
+
 	
 	ren catf cat1
 	ren catt cat2
@@ -232,7 +248,7 @@ preserve
 	ren f flo1
 	ren t flo2
 		
-	reshape long x flo val grp y cat lab, i(id layer) j(marker)
+	reshape long x flo val `pctlist' grp y cat lab, i(id layer) j(marker)
 	*drop tt
 
 
@@ -254,27 +270,33 @@ preserve
 	}	
 	
 
+
+	
 	**** from sankey	
 	
 	gen layer2 = layer
 	replace layer2 = layer2 + 1 if marker==2	
 	
-
+	
 	sort layer2 var marker
 
+
 	if "`percent2'" != "" {
-		bysort layer2 var: egen double val_out_temp2 = sum(val) if marker==1 & missing(_mtag) // how much value is sent out
-		bysort layer2 var: egen double val_in_temp2  = sum(val) if marker==2 & missing(_mtag) // how many value comes in
+		bysort layer2 var: egen double val_out_temp2 = sum(_pct) if marker==1 & missing(_mtag) // how much value is sent out
+		bysort layer2 var: egen double val_in_temp2  = sum(_pct) if marker==2 & missing(_mtag) // how many value comes in
 		
 		bysort layer2 var: egen double val_out2 = max(val_out_temp2)  if missing(_mtag)
-		bysort layer2 var: egen double val_in2  = max(val_in_temp2)    if missing(_mtag)
+		bysort layer2 var: egen double val_in2  = max(val_in_temp2)   if missing(_mtag)
 	
 		drop *temp2
 		recode val_in2 val_out2 (.=0)
 	
-		egen double height2 = rowmax(val_in2 val_out2) if missing(_mtag)
 
+		egen double height2 = rowmax(val_in2 val_out2) if missing(_mtag)
 	}
+
+
+	
 	
 	bysort layer2 var: egen double val_out_temp = sum(val) if marker==1 // how much value is sent out
 	bysort layer2 var: egen double val_in_temp  = sum(val) if marker==2 // how many value comes in
@@ -286,6 +308,9 @@ preserve
 	recode val_in val_out (.=0)
 	
 	egen double height = rowmax(val_in val_out) // this is the maximum height for each category for each group.
+
+	drop val_in* val_out*
+	
 
 
 	// layer order
@@ -304,8 +329,19 @@ preserve
 	egen temp = tag(layer2 var)
 	gen bar_order = sum(temp)
 	drop temp
-	
 
+	
+	if "`percent2'" != "" {
+		egen _pct2tag = tag(x name)
+		bysort x: egen _pct2total = sum(height) if _pct2tag==1 & missing(_mtag)
+		
+		gen double height3 = (height / _pct2total) * 100
+		
+	}
+	
+	
+	
+	
 	
 	*****************************
 	**** generate the boxes   ***
@@ -314,6 +350,8 @@ preserve
 	egen tag = tag(layer2 height order)
 	sort layer2 tag order
 
+	
+	
 	if "`percent2'" == "" {
 		by layer2: gen double heightsum = sum(height) if tag==1 
 	}
@@ -321,6 +359,9 @@ preserve
 		by layer2: gen double heightsum = sum(height2) if tag==1 & missing(_mtag) 
 	}
 
+	
+
+	
 	// gen spike coordinates
 	bysort layer2: gen double y1 = heightsum[_n-1] if tag==1  // 
 	recode y1 (.=0)  if tag==1
@@ -356,7 +397,7 @@ preserve
 	cap drop heightsum
 
 	
-	
+
 			
 	*************************
 	** generate the links  **
@@ -489,7 +530,7 @@ preserve
 		replace stack_start = stack_start + `displace' if layer2==`x'		
 	}
 	
-
+	
 	*** generate the curves	
 	
 
@@ -571,8 +612,6 @@ preserve
 	// wrappers
 
 	
-	
-
 	
 	// define all the locals before drawing
 	
@@ -711,8 +750,11 @@ preserve
 	
 	if "`nolabels'" == "" {
 		if "`showtotal'" != "" {
-			if "`percent'" != "" | "`percent2'" !="" {
+			if "`percent'" != "" { 
 				gen lab2 = name + " (" + string(height, "`format'") + "%)" if tag_spike==1
+			}
+			else if "`percent2'" != "" { 
+				gen lab2 = name + " (" + string(height3, "`format'") + "%)" if tag_spike==1
 			}
 			else {
 				gen lab2 = name + " (" + string(height, "`format'") + ")" if tag_spike==1
@@ -726,11 +768,10 @@ preserve
 		if "`wraplabel'" != "" {
 			ren lab2 lab2_temp
 			labsplit lab2_temp, wrap(`wraplabel') gen(lab2)
-			drop lab2_temp
-			
-			replace lab2 = subinstr(lab2, "_missing", "{it:missing}", .)
-			
+			drop lab2_temp	
 		}			
+		
+		replace lab2 = subinstr(lab2, "_missing", "{it:missing}", .)
 		
 		if "`labprop'" != "" {
 			summ height if tag_spike==1, meanonly
