@@ -9,20 +9,20 @@
 
 
 
-# alluvial v1.5
+# alluvial v1.51
 (06 Mar 2025)
 
 ## Installation
 
 The package can be installed via SSC or GitHub. The GitHub version, *might* be more recent due to bug fixes, feature updates etc, and *may* contain syntax improvements and changes in *default* values. See version numbers below. Eventually the GitHub version is published on SSC.
 
-SSC (**v1.42**):
+SSC (**v1.5**):
 
 ```
 ssc install alluvial, replace
 ```
 
-GitHub (**v1.5**):
+GitHub (**v1.51**):
 
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
@@ -267,8 +267,6 @@ alluvial  race married collgrad smsa union,  smooth(8) alpha(60) palette(CET C6)
 ### v1.41 
 
 
-
-
 ```stata
 alluvial race married collgrad smsa union, smooth(8) alpha(60) palette(CET C6) valsize(2)  ///
 	laba(0) labs(1.6) boxw(11) gap(2) novalues ///
@@ -304,6 +302,10 @@ Please open an [issue](https://github.com/asjadnaqvi/stata-alluvial/issues) to r
 
 
 ## Change log
+
+**v1.51 (23 Sep 2025)**
+- Added option `dropmiss` that drops any incomplete row. Might be useful if `share` or `percent` options are being used. (requested by Emma Romell).
+- Minor code improvements.
 
 **v1.5 (27 Apr 2025)**
 - Complete rework of the base code. This command should now run much faster.

@@ -1,6 +1,7 @@
-*! alluvial v1.5 (27 Apr 2025):
+*! alluvial v1.51 (23 Sep 2025):
 *! Asjad Naqvi (asjadnaqvi@gmail.com)
 
+* v1.51	(23 Sep 2025): Add option dropmiss to show percentages without missing values
 * v1.5	(27 Apr 2025): reworked the baseline routines. better handling of missings.
 * v1.42	(06 Mar 2025): fixed the program dropping missing values. fixed label wrapping for missing.
 * v1.41	(11 Nov 2024): value(numvar) for a flow var. fixed string checks. if condition fixed.
@@ -26,8 +27,8 @@ version 15
 		[ VALCONDition(real 0) offset(real 0) ]  ///  // v1.1
 		[ BOXWidth(string) ] /// // v1.2 
 		[ CATGap(real 4) CATSize(string) CATAngle(string) CATColor(string) CATPOSition(string) LABColor(string)  *  ]  ///   // v1.3 options
-		[ WRAPLABel(numlist >0 max=1) wrapcat(numlist >0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30) NOVALLeft NOVALRight percent percent2 ]    // v1.4 updates
-		
+		[ WRAPLABel(numlist >0 max=1) wrapcat(numlist >0 max=1) valprop labprop valscale(real 0.33333) labscale(real 0.33333) n(real 30)  ] ///   // v1.4 updates
+		[ NOVALLeft NOVALRight percent percent2 dropmiss ]
 
 	// check dependencies
 	cap findfile colorpalette.ado
@@ -47,6 +48,8 @@ preserve
 	keep if `touse'   // do not enable. drops missing values.
 	keep `varlist' `exp' `value'
 
+	
+	
 	
 	foreach x of local varlist {
 	
@@ -93,10 +96,16 @@ preserve
 	local varcount : word count `varlist'
 	local items2 = `varcount' - 1
 
-	
 	tokenize `varlist'
 
 	local obs = _N
+	
+	if "`dropmiss'" != "" {
+		tempvar _nonmiss
+		egen `_nonmiss' = rownonmiss(`varlist') 
+		drop if `_nonmiss' < `varcount'
+	}	
+	
 	
 	
 	forval i = 1/`items2' {	
@@ -129,13 +138,13 @@ preserve
 	
 	
 	drop temp
-	gen id = _n
-	order id
+	gen __id = _n
+	order __id
 
-	reshape long f t labf labt catf catt, i(id) j(layer)
+	reshape long f t labf labt catf catt, i(__id) j(layer)
 	
 	
-	drop id
+	drop __id
 	
 	sort layer f
 	
@@ -183,7 +192,7 @@ preserve
 		bysort layer: egen double _mysum2 = sum(`value') if missing(_mtag) // for labels only
 		
 		gen double _pct2 = (`value' / _mysum2) * 100
-		replace    `value' = (`value' / _mysum) * 100
+		replace  `value' = (`value' / _mysum ) * 100
 
 	}
 	
@@ -209,7 +218,7 @@ preserve
 	gen x2 = x1 + 1
 	
 	ren `value' val1
-	gen val2 = val1
+	gen val2  = val1
 	
 	
 	if "`percent2'" != "" {
@@ -269,14 +278,11 @@ preserve
 		encode name, gen(var) // alphabetical organization
 	}	
 	
-
-
 	
 	**** from sankey	
 	
 	gen layer2 = layer
 	replace layer2 = layer2 + 1 if marker==2	
-	
 	
 	sort layer2 var marker
 
@@ -296,7 +302,6 @@ preserve
 	}
 
 
-	
 	
 	bysort layer2 var: egen double val_out_temp = sum(val) if marker==1 // how much value is sent out
 	bysort layer2 var: egen double val_in_temp  = sum(val) if marker==2 // how many value comes in
@@ -615,17 +620,17 @@ preserve
 	
 	// define all the locals before drawing
 	
-	if "`lcolor'"       == "" local lcolor black
-	if "`labcolor'"     == "" local labcolor black
-	if "`lwidth'"       == "" local lwidth 0.02	
+	if "`lcolor'"       == "" local lcolor 		black
+	if "`labcolor'"     == "" local labcolor 	black
+	if "`lwidth'"       == "" local lwidth 		0.02	
 	if "`colorvarmiss'" == "" local colorvarmiss gs12
-	if "`labangle'" 	== "" local labangle 90
-	if "`labsize'"  	== "" local labsize 2	
+	if "`labangle'" 	== "" local labangle 	90
+	if "`labsize'"  	== "" local labsize 	2	
 	if "`labposition'"  == "" local labposition 0	
-	if "`labgap'" 		== "" local labgap 0
-	if "`valsize'"  	== "" local valsize 1.5
-	if "`valgap'" 	 	== "" local valgap 2
-	if "`boxwidth'"    	== "" local boxwidth 3.2
+	if "`labgap'" 		== "" local labgap 		0
+	if "`valsize'"  	== "" local valsize 	1.5
+	if "`valgap'" 	 	== "" local valgap 		2
+	if "`boxwidth'"    	== "" local boxwidth 	3.2
 	if "`colorboxmiss'" == "" local colorboxmiss gs10
 	
 	if "`format'" 		== "" {
@@ -658,7 +663,6 @@ preserve
 	
 	
 	// draw bars
-	
 	
 	encode name, gen(name2)
 	

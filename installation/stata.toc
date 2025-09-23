@@ -1,8 +1,8 @@
-v 1.5
+v 1.51
 d 'ALLUVIAL': A Stata package for Alluvial plots
 d Asjad Naqvi
 d
-d Distribution-Date: 20250427
+d Distribution-Date: 20250923
 d
 d asjadnaqvi@gmail.com
 d https://medium.com/the-stata-guide

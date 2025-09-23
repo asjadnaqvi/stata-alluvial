@@ -1,7 +1,7 @@
 {smcl}
-{* 27Apr2025}{...}
+{* 23Sep2025}{...}
 {hi:help alluvial}{...}
-{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.5 (GitHub)}}
+{right:{browse "https://github.com/asjadnaqvi/stata-alluvial":alluvial v1.51 (GitHub)}}
 
 {hline}
 
@@ -12,11 +12,11 @@
 {p 8 15 2}
 
 {cmd:alluvial} {it:varlist} {ifin} {weight}, 
-                {cmd:[} {cmd:value}({it:numvar}) {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) {cmdab:share:s} {cmdab:percent} {cmdab:percent2}
-                  {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labc:olor}({it:str}) {cmdab:labg:ap}({it:str}) 
+                {cmd:[} {cmd:value}({it:numvar}) {cmd:palette}({it:str}) {cmd:colorby}({it:layer}|{it:level}) {cmd:smooth}({it:1-8}) {cmd:gap}({it:num}) {cmdab:recen:ter}({it:mid}|{it:bot}|{it:top}) 
+                  {cmdab:laba:ngle}({it:str}) {cmdab:labs:ize}({it:str}) {cmdab:labpos:ition}({it:str}) {cmdab:labc:olor}({it:str}) {cmdab:labg:ap}({it:str}) {cmdab:share:s} {cmdab:percent} {cmdab:percent2}
                   {cmdab:cata:ngle}({it:str}) {cmdab:cats:ize}({it:str}) {cmdab:catpos:ition}({it:str}) {cmdab:catc:olor}({it:str}) {cmdab:catg:ap}({it:str}) 
                   {cmdab:vals:ize}({it:str}) {cmdab:valcond:ition}({it:num}) {cmd:format}({it:str}) {cmdab:valg:ap}({it:str}) {cmdab:noval:ues} {cmdab:showtot:al} {cmdab:novall:eft} {cmdab:novalr:ight} 
-                  {cmdab:lw:idth}({it:str}) {cmdab:lc:olor}({it:str}) {cmd:alpha}({it:num}) {cmd:offset}({it:num}) {cmdab:boxw:idth}({it:str})
+                  {cmdab:lw:idth}({it:str}) {cmdab:lc:olor}({it:str}) {cmd:alpha}({it:num}) {cmd:offset}({it:num}) {cmdab:boxw:idth}({it:str}) {cmd:dropmiss}
                   {cmdab:wraplab:el}({it:num}) {cmdab:wrapcat}({it:num}) {cmd:valprop} {cmd:labprop} {cmdab:valscale}({it:num}) {cmdab:labscale}({it:num}) {cmdab:n}({it:num}) {cmdab:*} {cmd:]}
 
 {synoptset 36 tabbed}{...}
@@ -36,6 +36,8 @@ each layer a unique color. The {it:level} option will give each category a uniqu
 The default value is {opt colorby(level)}.{p_end}
 
 {p2coldent : {opt showmiss}}Add a missing values category on the graph. The shares of existing categories plus the missing category for each layer add up to one.{p_end}
+
+{p2coldent : {opt dropmiss}}This will drop any row with at least one missing value. Might be useful in cases where {opt percent} or {opt share} are used.{p_end}
 
 {p2coldent : {opt shares}}Convert column values into shares. Weighted if {opt weights} are specified.{p_end}
 
@@ -137,8 +139,8 @@ See {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub} for examples.
 
 {title:Package details}
 
-Version      : {bf:alluvial} v1.5
-This release : 27 Apr 2025
+Version      : {bf:alluvial} v1.51
+This release : 23 Sep 2025
 First release: 10 Dec 2022
 Repository   : {browse "https://github.com/asjadnaqvi/stata-alluvial":GitHub}
 Keywords     : Stata, graph, alluvial

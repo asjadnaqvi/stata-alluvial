@@ -1,4 +1,4 @@
-v 1.5
+v 1.51
 d {bf:ALLUVIAL}: A Stata package for alluvial plots.
 d See {bf:help alluvial} after installation.
 d
@@ -9,9 +9,9 @@ d KW: graphs
 d KW: alluvial plot
 d
 d
-d Distribution-Date: 20250427
+d Distribution-Date: 20250923
 d
-d This  version: 27 Apr 2025
+d This  version: 23 Sep 2025
 d First version: 10 Dec 2022
 d License: MIT
 d
