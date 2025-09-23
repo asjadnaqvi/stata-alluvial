@@ -10,7 +10,7 @@
 
 
 # alluvial v1.51
-(06 Mar 2025)
+(23 Sep 2025)
 
 ## Installation
 
@@ -27,7 +27,6 @@ GitHub (**v1.51**):
 ```
 net install alluvial, from("https://raw.githubusercontent.com/asjadnaqvi/stata-alluvial/main/installation/") replace
 ```
-
 
 
 The `palettes` package is required to run this command:
